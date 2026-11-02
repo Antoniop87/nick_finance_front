@@ -125,6 +125,31 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+// Barras de rolagem finas, na cor da borda, sem as setas do sistema.
+// Um componente pode trocar a cor do polegar redefinindo --scrollbar-thumb.
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb, var(--border-strong)) transparent;
+}
+
+// Navegadores sem scrollbar-color (Safari) usam os pseudo-elementos.
+@supports not (scrollbar-color: auto) {
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background: var(--scrollbar-thumb, var(--border-strong)) padding-box;
+  }
+}
+
 h1,
 h2,
 h3 {

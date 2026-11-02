@@ -17,6 +17,14 @@ $mobile: 960px;
   background: var(--surface);
   border-right: 1px solid var(--border);
 
+  // A barra de rolagem do menu só aparece quando o mouse está sobre ele.
+  --scrollbar-thumb: transparent;
+
+  &:hover,
+  &:focus-within {
+    --scrollbar-thumb: var(--border-strong);
+  }
+
   // Em telas muito baixas nem o menu cabe entre a marca e o rodapé: rola tudo.
   @media (max-height: 560px) {
     overflow-y: auto;
