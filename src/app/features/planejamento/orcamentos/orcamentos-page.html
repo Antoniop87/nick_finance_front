@@ -1,0 +1,150 @@
+<header class="page-header">
+  <div>
+    <span class="eyebrow">Planejamento · {{ hoje | date: 'MMMM yyyy' }}</span>
+    <h1>Orçamentos</h1>
+    <p>Defina limites mensais por categoria e acompanhe quanto já gastou.</p>
+  </div>
+  <div class="page-actions">
+    <button type="button" class="btn btn-primary" (click)="novo.set({ categoriaId: null })">
+      <app-icon name="plus" /> Novo orçamento
+    </button>
+  </div>
+</header>
+
+@if (store.error(); as error) {
+  <div class="alert alert-error" role="alert"><app-icon name="alert" /> {{ error }}</div>
+}
+
+<section class="summary-grid">
+  <article class="card summary-card">
+    <span class="chip-icon chip-icon--info"><app-icon name="pieChart" /></span>
+    <div>
+      <span>Orçado no mês</span>
+      <strong class="display-number">{{ totais().orcado | currency }}</strong>
+    </div>
+  </article>
+  <article class="card summary-card">
+    <span class="chip-icon chip-icon--danger"><app-icon name="arrowDownRight" /></span>
+    <div>
+      <span>Gasto nessas categorias</span>
+      <strong class="display-number">{{ totais().gasto | currency }}</strong>
+    </div>
+  </article>
+  <article class="card summary-card">
+    <span [class]="totais().restante < 0 ? 'chip-icon chip-icon--danger' : 'chip-icon chip-icon--success'">
+      <app-icon name="wallet" />
+    </span>
+    <div>
+      <span>{{ totais().restante < 0 ? 'Acima do orçado' : 'Ainda pode gastar' }}</span>
+      <strong class="display-number" [class.negative]="totais().restante < 0">
+        {{ (totais().restante < 0 ? -totais().restante : totais().restante) | currency }}
+      </strong>
+    </div>
+  </article>
+</section>
+
+@if (sugestoes().length) {
+  <section class="card hint">
+    <span class="chip-icon chip-icon--sm chip-icon--warning"><app-icon name="sparkles" [size]="16" /></span>
+    <span class="hint__text">Categorias com gastos este mês e sem orçamento:</span>
+    <div class="hint__chips">
+      @for (s of sugestoes(); track s.categoria!.id) {
+        <button type="button" class="btn btn-secondary btn-sm" (click)="novo.set({ categoriaId: s.categoria!.id })">
+          <app-icon name="plus" [size]="14" /> {{ s.categoria!.nome }} · {{ s.gasto | currency }}
+        </button>
+      }
+    </div>
+  </section>
+}
+
+@if (store.loading() && !store.items().length) {
+  <div class="cards">
+    @for (i of [1, 2, 3]; track i) {
+      <div class="skeleton skeleton--card"></div>
+    }
+  </div>
+} @else if (!linhas().length) {
+  <div class="card">
+    <app-empty-state
+      icon="pieChart"
+      title="Nenhum orçamento ainda"
+      description="Crie um limite para categorias como Alimentação ou Lazer. O bot do Telegram avisa quando você chegar perto dele."
+    >
+      <button type="button" class="btn btn-primary" (click)="novo.set({ categoriaId: null })">
+        <app-icon name="plus" /> Criar orçamento
+      </button>
+    </app-empty-state>
+  </div>
+} @else {
+  <div class="cards">
+    @for (linha of linhas(); track linha.orcamento.id) {
+      <article class="card item-card">
+        <header class="item-card__head">
+          <app-categoria-badge [categoria]="linha.categoria" />
+          <div class="item-card__title">
+            <strong>{{ linha.categoria?.nome ?? 'Categoria removida' }}</strong>
+            <span>Limite de {{ linha.orcamento.valorLimite | currency }}/mês</span>
+          </div>
+          <div class="item-actions">
+            <button type="button" class="btn-icon" aria-label="Editar" (click)="emEdicao.set(linha.orcamento)">
+              <app-icon name="pencil" [size]="16" />
+            </button>
+            <button
+              type="button"
+              class="btn-icon btn-icon--danger"
+              aria-label="Excluir"
+              (click)="paraExcluir.set(linha.orcamento)"
+            >
+              <app-icon name="trash" [size]="16" />
+            </button>
+          </div>
+        </header>
+
+        <div class="valores">
+          <strong class="display-number">{{ linha.situacao.gasto | currency }}</strong>
+          <span>{{ linha.situacao.percentual | number: '1.0-0' }}%</span>
+        </div>
+        <div class="progress">
+          <div
+            class="progress__bar"
+            [class.progress__bar--warning]="linha.situacao.status === 'alerta'"
+            [class.progress__bar--danger]="linha.situacao.status === 'estourado'"
+            [style.width.%]="linha.situacao.percentual > 100 ? 100 : linha.situacao.percentual"
+          ></div>
+        </div>
+        <p class="status" [class.status--warning]="linha.situacao.status === 'alerta'" [class.status--danger]="linha.situacao.status === 'estourado'">
+          @switch (linha.situacao.status) {
+            @case ('estourado') {
+              Passou {{ -linha.situacao.restante | currency }} do limite
+            }
+            @case ('alerta') {
+              Atenção: restam {{ linha.situacao.restante | currency }}
+            }
+            @default {
+              Restam {{ linha.situacao.restante | currency }}
+            }
+          }
+        </p>
+      </article>
+    }
+  </div>
+}
+
+@if (novo(); as n) {
+  <app-orcamento-dialog [categoriaId]="n.categoriaId" (closed)="novo.set(null)" />
+}
+
+@if (emEdicao(); as orcamento) {
+  <app-orcamento-dialog [orcamento]="orcamento" (closed)="emEdicao.set(null)" />
+}
+
+@if (paraExcluir(); as orcamento) {
+  <app-confirm-dialog
+    title="Remover orçamento?"
+    [message]="'O limite de ' + nomeCategoria(orcamento) + ' deixa de ser acompanhado. Seus lançamentos não mudam.'"
+    confirmLabel="Remover"
+    [busy]="excluindo()"
+    (confirmed)="excluir(orcamento)"
+    (cancelled)="paraExcluir.set(null)"
+  />
+}

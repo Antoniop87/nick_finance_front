@@ -1,0 +1,261 @@
+<header class="page-header">
+  <div>
+    <span class="eyebrow">{{ today | date: "EEEE, d 'de' MMMM" }}</span>
+    <h1>Olá, {{ user()?.nome }}</h1>
+    <p>Aqui está o resumo das suas finanças.</p>
+  </div>
+</header>
+
+@if (facade.error(); as error) {
+  <div class="alert alert-error error-banner" role="alert">
+    <app-icon name="alert" />
+    <span>{{ error }}</span>
+    <button type="button" class="btn btn-secondary" (click)="facade.load(true)">
+      <app-icon name="refresh" /> Tentar novamente
+    </button>
+  </div>
+}
+
+@if (showSkeleton()) {
+  <div class="top">
+    <div class="skeleton skeleton--hero"></div>
+    <div class="skeleton skeleton--hero"></div>
+  </div>
+  <div class="kpis">
+    @for (i of [1, 2, 3, 4]; track i) {
+      <div class="skeleton skeleton--kpi"></div>
+    }
+  </div>
+} @else if (isEmpty()) {
+  <section class="hero hero--empty">
+    <div class="hero__content">
+      <span class="hero__eyebrow"><app-icon name="sparkles" [size]="14" /> Comece por aqui</span>
+      <h2>Organize seu dinheiro em poucos minutos</h2>
+      <p>Registre o que entra e o que sai. O Nick Finance calcula seu saldo e mostra para onde vai cada real.</p>
+      <div class="hero__actions">
+        <button type="button" class="btn btn-light btn-lg" (click)="dialogTipo.set('receita')">
+          <app-icon name="arrowUpRight" /> Registrar entrada
+        </button>
+        <button type="button" class="btn btn-glass btn-lg" (click)="dialogTipo.set('despesa')">
+          <app-icon name="arrowDownRight" /> Registrar despesa
+        </button>
+      </div>
+    </div>
+  </section>
+} @else if (facade.loaded() || facade.todos().length) {
+  <div class="top">
+    <section class="hero" aria-label="Saldo geral">
+      <div class="hero__content">
+        <span class="hero__eyebrow"><app-icon name="wallet" [size]="14" /> Saldo geral</span>
+        <strong class="hero__value display-number">{{ geral().saldo | currency }}</strong>
+        <p>Tudo que entrou menos tudo que saiu</p>
+
+        <div class="hero__stats">
+          <div>
+            <span><app-icon name="arrowUpRight" [size]="14" /> Total de entradas</span>
+            <strong class="tabular">{{ geral().entradas | currency }}</strong>
+          </div>
+          <div>
+            <span><app-icon name="arrowDownRight" [size]="14" /> Total de saídas</span>
+            <strong class="tabular">{{ geral().saidas | currency }}</strong>
+          </div>
+        </div>
+
+        <div class="hero__actions">
+          <button type="button" class="btn btn-light" (click)="dialogTipo.set('receita')">
+            <app-icon name="plus" /> Nova entrada
+          </button>
+          <button type="button" class="btn btn-glass" (click)="dialogTipo.set('despesa')">
+            <app-icon name="plus" /> Nova despesa
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card month">
+      <div class="month__head">
+        <div>
+          <span class="eyebrow">Saldo de {{ today | date: 'MMMM' }}</span>
+          <strong class="month__value display-number" [class.negative]="mes().saldo < 0">
+            {{ mes().saldo | currency }}
+          </strong>
+        </div>
+        <span class="chip-icon" [class]="mes().saldo < 0 ? 'chip-icon chip-icon--danger' : 'chip-icon chip-icon--success'">
+          <app-icon name="pieChart" />
+        </span>
+      </div>
+
+      @let pct = comprometido();
+      <div class="budget">
+        <div class="budget__labels">
+          <span>Gasto das entradas</span>
+          <strong class="tabular">{{ pct === null ? '—' : (pct | number: '1.0-0') + '%' }}</strong>
+        </div>
+        <div class="budget__track">
+          <div
+            class="budget__bar"
+            [class.budget__bar--warning]="pct !== null && pct >= 70"
+            [class.budget__bar--danger]="pct !== null && pct >= 100"
+            [style.width.%]="pct === null ? 0 : (pct > 100 ? 100 : pct)"
+          ></div>
+        </div>
+      </div>
+
+      <ul class="month__rows">
+        <li>
+          <span><span class="dot dot--entrada"></span> Entrou</span>
+          <strong class="tabular">{{ mes().entradas | currency }}</strong>
+        </li>
+        <li>
+          <span><span class="dot dot--saida"></span> Saiu</span>
+          <strong class="tabular">{{ mes().saidas | currency }}</strong>
+        </li>
+      </ul>
+
+      @if (temPlanejamento()) {
+        <div class="projecao" [title]="'A entrar ' + (projecao().aEntrar | currency) + ' · a sair ' + (projecao().aSair | currency)">
+          <span><app-icon name="clock" [size]="14" /> Previsto para o fim do mês</span>
+          <strong class="tabular" [class.negative]="projecao().projetado < 0">{{ projecao().projetado | currency }}</strong>
+        </div>
+      }
+
+      <p class="month__status" [class.month__status--bad]="mes().saldo < 0">
+        @if (pct === null) {
+          Nenhuma entrada registrada neste mês.
+        } @else if (mes().saldo < 0) {
+          Você gastou mais do que recebeu este mês.
+        } @else {
+          Você está no azul este mês. Continue assim!
+        }
+      </p>
+    </section>
+  </div>
+
+  <section class="kpis" aria-label="Indicadores do mês">
+    <article class="card kpi">
+      <div class="kpi__head">
+        <span class="kpi__label">Entradas no mês</span>
+        <span class="chip-icon chip-icon--sm chip-icon--success"><app-icon name="arrowUpRight" [size]="16" /></span>
+      </div>
+      <strong class="kpi__value display-number">{{ mes().entradas | currency }}</strong>
+      @let ve = variacaoEntradas();
+      @if (ve !== null) {
+        <span class="pill" [class.pill--success]="ve >= 0" [class.pill--danger]="ve < 0">
+          {{ ve > 0 ? '+' : '' }}{{ ve | number: '1.0-1' }}% vs. mês anterior
+        </span>
+      } @else {
+        <span class="kpi__hint">Sem entradas no mês anterior</span>
+      }
+    </article>
+
+    <article class="card kpi">
+      <div class="kpi__head">
+        <span class="kpi__label">Saídas no mês</span>
+        <span class="chip-icon chip-icon--sm chip-icon--danger"><app-icon name="arrowDownRight" [size]="16" /></span>
+      </div>
+      <strong class="kpi__value display-number">{{ mes().saidas | currency }}</strong>
+      @let vs = variacaoSaidas();
+      @if (vs !== null) {
+        <span class="pill" [class.pill--danger]="vs > 0" [class.pill--success]="vs <= 0">
+          {{ vs > 0 ? '+' : '' }}{{ vs | number: '1.0-1' }}% vs. mês anterior
+        </span>
+      } @else {
+        <span class="kpi__hint">Sem gastos no mês anterior</span>
+      }
+    </article>
+
+    <article class="card kpi">
+      <div class="kpi__head">
+        <span class="kpi__label">Maior despesa</span>
+        <span class="chip-icon chip-icon--sm chip-icon--warning"><app-icon name="alert" [size]="16" /></span>
+      </div>
+      @if (maiorDespesa(); as maior) {
+        <strong class="kpi__value display-number">{{ maior.valor | currency }}</strong>
+        <span class="kpi__hint truncate">{{ maior.descricao }}</span>
+      } @else {
+        <strong class="kpi__value display-number">—</strong>
+        <span class="kpi__hint">Nenhuma despesa no mês</span>
+      }
+    </article>
+
+    <article class="card kpi">
+      <div class="kpi__head">
+        <span class="kpi__label">Lançamentos no mês</span>
+        <span class="chip-icon chip-icon--sm chip-icon--info"><app-icon name="receipt" [size]="16" /></span>
+      </div>
+      <strong class="kpi__value display-number">{{ quantidadeMes() }}</strong>
+      <span class="kpi__hint">Gasto médio {{ ticketMedio() | currency }}</span>
+    </article>
+  </section>
+
+  <div class="grid">
+    <section class="card">
+      <header class="card-header">
+        <div>
+          <h2>Entradas x saídas</h2>
+          <p>Últimos 6 meses</p>
+        </div>
+        <div class="legend">
+          <span><span class="dot dot--entrada"></span> Entradas</span>
+          <span><span class="dot dot--saida"></span> Saídas</span>
+        </div>
+      </header>
+      <div class="card-body">
+        <app-cashflow-chart [lancamentos]="facade.todos()" [reference]="today" />
+      </div>
+    </section>
+
+    <section class="card">
+      <header class="card-header">
+        <div>
+          <h2>Gastos por categoria</h2>
+          <p>{{ today | date: 'MMMM' }}</p>
+        </div>
+        <a routerLink="/categorias" class="see-all">Categorias <app-icon name="chevronRight" [size]="16" /></a>
+      </header>
+      <div class="card-body">
+        <app-categoria-donut [despesas]="despesasDoMes()" [categorias]="categorias.porId()" />
+      </div>
+    </section>
+  </div>
+
+  <app-planejamento-resumo [despesasDoMes]="despesasDoMes()" />
+
+  <section class="card">
+    <header class="card-header">
+      <div>
+        <h2>Últimos lançamentos</h2>
+        <p>Entradas e despesas mais recentes</p>
+      </div>
+      <a routerLink="/extrato" class="see-all">Ver extrato <app-icon name="chevronRight" [size]="16" /></a>
+    </header>
+    <div class="card-body">
+      <ul class="recent">
+        @for (lancamento of ultimos(); track lancamento.key) {
+          <li>
+            <app-categoria-badge [categoria]="categoriaDe(lancamento)" />
+            <div class="recent__info">
+              <strong class="truncate">{{ lancamento.descricao }}</strong>
+              <span class="truncate">
+                {{ categoriaDe(lancamento)?.nome ?? (lancamento.tipo === 'receita' ? 'Entrada' : 'Despesa') }}
+                @if (lancamento.detalhe) {
+                  · {{ lancamento.detalhe }}
+                }
+              </span>
+            </div>
+            <div class="recent__amount">
+              <strong class="tabular" [class.positive]="lancamento.tipo === 'receita'">
+                {{ lancamento.tipo === 'receita' ? '+' : '−' }} {{ lancamento.valor | currency }}
+              </strong>
+              <span>{{ lancamento.data | date: "d 'de' MMM" }}</span>
+            </div>
+          </li>
+        }
+      </ul>
+    </div>
+  </section>
+}
+
+@if (dialogTipo(); as tipo) {
+  <app-lancamento-dialog [tipo]="tipo" (closed)="dialogTipo.set(undefined)" />
+}

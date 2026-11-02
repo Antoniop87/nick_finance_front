@@ -1,0 +1,214 @@
+// Estilos compartilhados pelas telas de planejamento (orçamentos, recorrentes, contas e metas).
+
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.page-header {
+  margin-bottom: 2px;
+
+  .eyebrow {
+    display: block;
+    margin-bottom: 6px;
+  }
+}
+
+// ---------- Dica com atalhos ----------
+
+.hint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+}
+
+.hint__text {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.hint__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+// ---------- Grade de cartões ----------
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 18px;
+}
+
+.item-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  transition: box-shadow 0.2s;
+
+  &:hover {
+    box-shadow: var(--shadow-md);
+  }
+}
+
+.item-card__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.item-card__title {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+
+  strong {
+    overflow: hidden;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  span {
+    color: var(--text-subtle);
+    font-size: 0.8rem;
+  }
+}
+
+.valores {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+
+  strong {
+    font-size: 1.35rem;
+    font-weight: 700;
+  }
+
+  span {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.status {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+
+  &--warning {
+    color: var(--warning);
+    font-weight: 600;
+  }
+
+  &--danger {
+    color: var(--danger);
+    font-weight: 600;
+  }
+}
+
+// ---------- Listas em linhas ----------
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 22px;
+
+    & + li {
+      border-top: 1px solid var(--border);
+    }
+
+    &:hover {
+      background: var(--surface-hover);
+    }
+
+    @media (max-width: 640px) {
+      flex-wrap: wrap;
+      padding: 14px 16px;
+    }
+  }
+
+  .inativa {
+    opacity: 0.55;
+  }
+}
+
+.lista__info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 160px;
+
+  strong {
+    font-weight: 600;
+  }
+
+  span {
+    color: var(--text-subtle);
+    font-size: 0.8rem;
+  }
+}
+
+.lista__valor {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.grupo-titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 14px 22px 8px;
+  border-top: 1px solid var(--border);
+  color: var(--text-subtle);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+
+  &:first-child {
+    border-top: none;
+  }
+
+  &--danger {
+    color: var(--danger);
+  }
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--border);
+}
+
+.skeleton--card {
+  height: 150px;
+  border-radius: var(--radius-lg);
+}
+
+.skeleton--row {
+  height: 56px;
+  margin: 10px 22px;
+}

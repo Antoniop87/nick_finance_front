@@ -1,0 +1,79 @@
+<header class="page-header">
+  <div>
+    <span class="eyebrow">Organização</span>
+    <h1>Categorias</h1>
+    <p>Organize seus lançamentos. O bot do Telegram também usa estas categorias.</p>
+  </div>
+</header>
+
+@if (store.error(); as error) {
+  <div class="alert alert-error" role="alert"><app-icon name="alert" /> {{ error }}</div>
+}
+
+<div class="grupos">
+  @for (grupo of grupos(); track grupo.tipo) {
+    <section class="card">
+      <header class="card-header">
+        <div>
+          <h2>{{ grupo.titulo }}</h2>
+          <p>{{ grupo.descricao }}</p>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm" (click)="novaDoTipo.set(grupo.tipo)">
+          <app-icon name="plus" [size]="16" /> Nova
+        </button>
+      </header>
+      <div class="card-body">
+        @if (store.loading() && !grupo.categorias.length) {
+          @for (i of [1, 2, 3, 4]; track i) {
+            <div class="skeleton skeleton--row"></div>
+          }
+        } @else {
+          <ul class="lista">
+            @for (categoria of grupo.categorias; track categoria.id) {
+              <li>
+                <app-categoria-badge [categoria]="categoria" />
+                <div class="lista__info">
+                  <strong>{{ categoria.nome }}</strong>
+                  @let quantidade = uso().get(categoria.id) ?? 0;
+                  <span>{{ quantidade }} {{ quantidade === 1 ? 'lançamento' : 'lançamentos' }}</span>
+                </div>
+                <div class="item-actions">
+                  <button type="button" class="btn-icon" aria-label="Editar" title="Editar" (click)="emEdicao.set(categoria)">
+                    <app-icon name="pencil" [size]="16" />
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-icon btn-icon--danger"
+                    aria-label="Excluir"
+                    title="Excluir"
+                    (click)="paraExcluir.set(categoria)"
+                  >
+                    <app-icon name="trash" [size]="16" />
+                  </button>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    </section>
+  }
+</div>
+
+@if (novaDoTipo(); as tipo) {
+  <app-categoria-dialog [tipo]="tipo" (closed)="novaDoTipo.set(null)" />
+}
+
+@if (emEdicao(); as categoria) {
+  <app-categoria-dialog [categoria]="categoria" (closed)="emEdicao.set(null)" />
+}
+
+@if (paraExcluir(); as categoria) {
+  <app-confirm-dialog
+    [title]="'Excluir “' + categoria.nome + '”?'"
+    [message]="mensagemExclusao(categoria)"
+    [busy]="excluindo()"
+    (confirmed)="excluir(categoria)"
+    (cancelled)="paraExcluir.set(null)"
+  />
+}

@@ -1,0 +1,54 @@
+.tipo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--radius);
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+}
+
+.tipo__option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+
+  &--active {
+    background: var(--surface);
+    box-shadow: var(--shadow);
+  }
+
+  &--receita.tipo__option--active {
+    color: var(--success);
+  }
+
+  &--despesa.tipo__option--active {
+    color: var(--danger);
+  }
+}
+
+.categoria-select {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  app-categoria-badge {
+    position: absolute;
+    left: 9px;
+    pointer-events: none;
+  }
+
+  .input {
+    padding-left: 44px;
+  }
+}

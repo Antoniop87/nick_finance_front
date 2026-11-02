@@ -1,0 +1,79 @@
+<aside class="sidebar" [class.sidebar--open]="menuOpen()">
+  <div class="sidebar__brand">
+    <img src="favicon.svg" alt="" width="34" height="34" />
+    <div class="brand-text">
+      <strong>Nick Finance</strong>
+      <span>Finanças pessoais</span>
+    </div>
+    <button type="button" class="btn-icon sidebar__close" aria-label="Fechar menu" (click)="menuOpen.set(false)">
+      <app-icon name="close" />
+    </button>
+  </div>
+
+  <nav class="nav" aria-label="Menu principal">
+    @for (section of navSections; track section.title) {
+      <div class="nav__section">
+        <span class="eyebrow nav__title">{{ section.title }}</span>
+        @for (item of section.items; track item.path) {
+          <a
+            class="nav__link"
+            [routerLink]="item.path"
+            routerLinkActive="nav__link--active"
+            (click)="menuOpen.set(false)"
+          >
+            <app-icon [name]="item.icon" />
+            {{ item.label }}
+          </a>
+        }
+      </div>
+    }
+  </nav>
+
+  <div class="sidebar__footer">
+    <button type="button" class="theme-toggle" (click)="themeService.toggle()">
+      <app-icon [name]="isDark() ? 'sun' : 'moon'" />
+      {{ isDark() ? 'Tema claro' : 'Tema escuro' }}
+    </button>
+
+    @if (user(); as user) {
+      <div class="profile">
+        <div class="avatar" aria-hidden="true">{{ initials() }}</div>
+        <div class="profile__info">
+          <strong>{{ user.nome }} {{ user.sobrenome }}</strong>
+          <span>{{ user.email }}</span>
+        </div>
+        <button type="button" class="btn-icon" aria-label="Sair" title="Sair" (click)="logout()">
+          <app-icon name="logout" />
+        </button>
+      </div>
+    }
+  </div>
+</aside>
+
+@if (menuOpen()) {
+  <div class="overlay" (click)="menuOpen.set(false)"></div>
+}
+
+<div class="main">
+  <header class="topbar">
+    <button type="button" class="btn-icon" aria-label="Abrir menu" (click)="menuOpen.set(true)">
+      <app-icon name="menu" />
+    </button>
+    <div class="topbar__brand">
+      <img src="favicon.svg" alt="" width="26" height="26" />
+      Nick Finance
+    </div>
+    <button
+      type="button"
+      class="btn-icon"
+      [attr.aria-label]="isDark() ? 'Usar tema claro' : 'Usar tema escuro'"
+      (click)="themeService.toggle()"
+    >
+      <app-icon [name]="isDark() ? 'sun' : 'moon'" />
+    </button>
+  </header>
+
+  <main class="content">
+    <router-outlet />
+  </main>
+</div>

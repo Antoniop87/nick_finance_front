@@ -1,0 +1,147 @@
+<header class="page-header">
+  <div>
+    <span class="eyebrow">Planejamento</span>
+    <h1>Metas</h1>
+    <p>Junte dinheiro para seus objetivos e veja quanto guardar por mês.</p>
+  </div>
+  <div class="page-actions">
+    <button type="button" class="btn btn-primary" (click)="nova.set(true)">
+      <app-icon name="plus" /> Nova meta
+    </button>
+  </div>
+</header>
+
+@if (store.error(); as error) {
+  <div class="alert alert-error" role="alert"><app-icon name="alert" /> {{ error }}</div>
+}
+
+<section class="summary-grid">
+  <article class="card summary-card">
+    <span class="chip-icon chip-icon--success"><app-icon name="piggyBank" /></span>
+    <div>
+      <span>Total guardado</span>
+      <strong class="display-number">{{ totais().guardado | currency }}</strong>
+    </div>
+  </article>
+  <article class="card summary-card">
+    <span class="chip-icon chip-icon--info"><app-icon name="target" /></span>
+    <div>
+      <span>Soma das metas</span>
+      <strong class="display-number">{{ totais().alvo | currency }}</strong>
+    </div>
+  </article>
+  <article class="card summary-card">
+    <span class="chip-icon chip-icon--warning"><app-icon name="sparkles" /></span>
+    <div>
+      <span>Metas concluídas</span>
+      <strong class="display-number">{{ totais().concluidas }} de {{ store.items().length }}</strong>
+    </div>
+  </article>
+</section>
+
+@if (store.loading() && !store.items().length) {
+  <div class="cards">
+    @for (i of [1, 2]; track i) {
+      <div class="skeleton skeleton--card"></div>
+    }
+  </div>
+} @else if (!cartoes().length) {
+  <div class="card">
+    <app-empty-state
+      icon="target"
+      title="Nenhuma meta ainda"
+      description="Uma viagem, uma reserva de emergência, um carro novo... Defina o valor e o prazo que a gente calcula o resto."
+    >
+      <button type="button" class="btn btn-primary" (click)="nova.set(true)">
+        <app-icon name="plus" /> Criar meta
+      </button>
+    </app-empty-state>
+  </div>
+} @else {
+  <div class="cards">
+    @for (c of cartoes(); track c.meta.id) {
+      <article class="card item-card meta" [class.meta--concluida]="c.plano.concluida">
+        <header class="item-card__head">
+          <span class="meta__icone" [style.color]="c.meta.cor" [style.background]="corDeFundo(c.meta.cor)">
+            <app-icon [name]="c.icone" [size]="20" />
+          </span>
+          <div class="item-card__title">
+            <strong>{{ c.meta.nome }}</strong>
+            <span>
+              @if (c.meta.prazo) {
+                Até {{ c.meta.prazo | date: "MMM 'de' yyyy" }}
+              } @else {
+                Sem prazo
+              }
+            </span>
+          </div>
+          <div class="item-actions">
+            <button type="button" class="btn-icon" aria-label="Editar" (click)="emEdicao.set(c.meta)">
+              <app-icon name="pencil" [size]="16" />
+            </button>
+            <button type="button" class="btn-icon btn-icon--danger" aria-label="Excluir" (click)="paraExcluir.set(c.meta)">
+              <app-icon name="trash" [size]="16" />
+            </button>
+          </div>
+        </header>
+
+        <div class="valores">
+          <strong class="display-number">{{ c.meta.valorGuardado | currency }}</strong>
+          <span>de {{ c.meta.valorAlvo | currency }}</span>
+        </div>
+        <div class="progress">
+          <div class="progress__bar" [style.width.%]="c.plano.percentual" [style.background]="c.meta.cor"></div>
+        </div>
+
+        <p class="status" [class.status--danger]="c.plano.prazoVencido">
+          @if (c.plano.concluida) {
+            🎉 Meta alcançada!
+          } @else if (c.plano.prazoVencido) {
+            O prazo passou. Faltam {{ c.plano.falta | currency }}.
+          } @else if (c.plano.porMes !== null) {
+            Guarde <strong>{{ c.plano.porMes | currency }}/mês</strong> por {{ c.plano.mesesRestantes }}
+            {{ c.plano.mesesRestantes === 1 ? 'mês' : 'meses' }} · {{ c.plano.percentual | number: '1.0-0' }}%
+          } @else {
+            Faltam {{ c.plano.falta | currency }} · {{ c.plano.percentual | number: '1.0-0' }}%
+          }
+        </p>
+
+        <div class="meta__acoes">
+          <button type="button" class="btn btn-primary btn-sm" (click)="movimento.set({ meta: c.meta, retirar: false })">
+            <app-icon name="plus" [size]="14" /> Guardar
+          </button>
+          <button
+            type="button"
+            class="btn btn-secondary btn-sm"
+            [disabled]="c.meta.valorGuardado <= 0"
+            (click)="movimento.set({ meta: c.meta, retirar: true })"
+          >
+            <app-icon name="minus" [size]="14" /> Retirar
+          </button>
+        </div>
+      </article>
+    }
+  </div>
+}
+
+@if (nova()) {
+  <app-meta-dialog (closed)="nova.set(false)" />
+}
+
+@if (emEdicao(); as meta) {
+  <app-meta-dialog [meta]="meta" (closed)="emEdicao.set(null)" />
+}
+
+@if (movimento(); as m) {
+  <app-movimento-dialog [meta]="m.meta" [retirar]="m.retirar" (closed)="movimento.set(null)" />
+}
+
+@if (paraExcluir(); as meta) {
+  <app-confirm-dialog
+    [title]="'Excluir a meta “' + meta.nome + '”?'"
+    message="O histórico guardado nesta meta será perdido. Seus lançamentos não mudam."
+    [busy]="excluindo()"
+    (confirmed)="excluir(meta)"
+    (cancelled)="paraExcluir.set(null)"
+  />
+}

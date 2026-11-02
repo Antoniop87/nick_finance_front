@@ -1,0 +1,29 @@
+<div class="chart" role="img" aria-label="Gráfico de entradas e saídas por mês">
+  <div class="chart__axis" aria-hidden="true">
+    @for (tick of data().ticks; track $index) {
+      <span>{{ tick }}</span>
+    }
+  </div>
+  <div class="chart__plot">
+    <div class="chart__grid" aria-hidden="true">
+      @for (tick of data().ticks; track $index) {
+        <span></span>
+      }
+    </div>
+    @for (bar of data().bars; track bar.key) {
+      <div class="chart__col" [class.chart__col--current]="bar.current">
+        <div class="chart__tooltip">
+          <strong>{{ bar.month | date: 'MMMM yyyy' }}</strong>
+          <span><span class="dot dot--entrada"></span> {{ bar.entradas | currency }}</span>
+          <span><span class="dot dot--saida"></span> {{ bar.saidas | currency }}</span>
+          <span [class.negative]="bar.saldo < 0">Saldo {{ bar.saldo | currency }}</span>
+        </div>
+        <div class="chart__bars">
+          <div class="chart__bar chart__bar--entrada" [style.height.%]="bar.entradasPercent"></div>
+          <div class="chart__bar chart__bar--saida" [style.height.%]="bar.saidasPercent"></div>
+        </div>
+        <span class="chart__label">{{ bar.month | date: 'MMM' }}</span>
+      </div>
+    }
+  </div>
+</div>

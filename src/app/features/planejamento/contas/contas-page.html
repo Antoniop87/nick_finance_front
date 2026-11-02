@@ -1,0 +1,151 @@
+<header class="page-header">
+  <div>
+    <span class="eyebrow">Planejamento</span>
+    <h1>Contas a pagar e receber</h1>
+    <p>Acompanhe vencimentos. O bot do Telegram lembra você no dia.</p>
+  </div>
+  <div class="page-actions">
+    <button type="button" class="btn btn-primary" (click)="nova.set(true)">
+      <app-icon name="plus" /> Nova conta
+    </button>
+  </div>
+</header>
+
+@if (store.error(); as error) {
+  <div class="alert alert-error" role="alert"><app-icon name="alert" /> {{ error }}</div>
+}
+
+<section class="summary-grid">
+  <article class="card summary-card">
+    <span class="chip-icon chip-icon--danger"><app-icon name="arrowDownRight" /></span>
+    <div>
+      <span>A pagar até o fim do mês</span>
+      <strong class="display-number">{{ resumo().aPagar | currency }}</strong>
+    </div>
+  </article>
+  <article class="card summary-card">
+    <span class="chip-icon chip-icon--success"><app-icon name="arrowUpRight" /></span>
+    <div>
+      <span>A receber até o fim do mês</span>
+      <strong class="display-number">{{ resumo().aReceber | currency }}</strong>
+    </div>
+  </article>
+  <article class="card summary-card">
+    <span [class]="resumo().atrasadas ? 'chip-icon chip-icon--danger' : 'chip-icon chip-icon--success'">
+      <app-icon [name]="resumo().atrasadas ? 'alert' : 'check'" />
+    </span>
+    <div>
+      <span>{{ resumo().atrasadas ? resumo().atrasadas + ' em atraso' : 'Nada em atraso' }}</span>
+      <strong class="display-number" [class.negative]="resumo().atrasadas > 0">{{ resumo().valorAtrasado | currency }}</strong>
+    </div>
+  </article>
+</section>
+
+<section class="card">
+  <div class="toolbar">
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" class="tabs__item" [class.tabs__item--active]="aba() === 'abertas'" (click)="aba.set('abertas')">
+        Em aberto
+      </button>
+      <button type="button" role="tab" class="tabs__item" [class.tabs__item--active]="aba() === 'pagas'" (click)="aba.set('pagas')">
+        Pagas <span class="count">{{ pagas().length }}</span>
+      </button>
+    </div>
+  </div>
+
+  @if (store.loading() && !store.items().length) {
+    @for (i of [1, 2, 3]; track i) {
+      <div class="skeleton skeleton--row"></div>
+    }
+  } @else if (aba() === 'abertas') {
+    @if (!grupos().length) {
+      <app-empty-state icon="checkSquare" title="Nenhuma conta em aberto" description="Cadastre boletos, faturas ou valores que você vai receber.">
+        <button type="button" class="btn btn-primary" (click)="nova.set(true)">
+          <app-icon name="plus" /> Cadastrar conta
+        </button>
+      </app-empty-state>
+    } @else {
+      @for (grupo of grupos(); track grupo.situacao) {
+        <h3 class="grupo-titulo" [class.grupo-titulo--danger]="grupo.situacao === 'atrasada'">
+          @if (grupo.situacao === 'atrasada') {
+            <app-icon name="alert" [size]="14" />
+          }
+          {{ grupo.titulo }}
+        </h3>
+        <ul class="lista">
+          @for (c of grupo.contas; track c.id) {
+            <li>
+              <app-categoria-badge [categoria]="categoria(c)" />
+              <div class="lista__info">
+                <strong>{{ c.descricao }}</strong>
+                <span>
+                  {{ c.tipo === 'despesa' ? 'A pagar' : 'A receber' }} · vence {{ c.vencimento | date: "d 'de' MMM" }}
+                  @if (c.detalhe) {
+                    · {{ c.detalhe }}
+                  }
+                </span>
+              </div>
+              <span class="lista__valor" [class.positive]="c.tipo === 'receita'">
+                {{ c.tipo === 'receita' ? '+' : '−' }} {{ c.valor | currency }}
+              </span>
+              <button type="button" class="btn btn-secondary btn-sm" [disabled]="ocupado() === c.id" (click)="pagar(c)">
+                <app-icon name="check" [size]="14" /> {{ c.tipo === 'despesa' ? 'Paguei' : 'Recebi' }}
+              </button>
+              <div class="item-actions">
+                <button type="button" class="btn-icon" aria-label="Editar" title="Editar" (click)="emEdicao.set(c)">
+                  <app-icon name="pencil" [size]="16" />
+                </button>
+                <button type="button" class="btn-icon btn-icon--danger" aria-label="Excluir" title="Excluir" (click)="paraExcluir.set(c)">
+                  <app-icon name="trash" [size]="16" />
+                </button>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    }
+  } @else {
+    @if (!pagas().length) {
+      <app-empty-state icon="clock" title="Nenhuma conta paga ainda" />
+    } @else {
+      <ul class="lista">
+        @for (c of pagas(); track c.id) {
+          <li>
+            <app-categoria-badge [categoria]="categoria(c)" />
+            <div class="lista__info">
+              <strong>{{ c.descricao }}</strong>
+              <span>{{ c.tipo === 'despesa' ? 'Paga' : 'Recebida' }} em {{ c.pagoEm | date: "d 'de' MMM" }} · vencia {{ c.vencimento | date: 'dd/MM' }}</span>
+            </div>
+            <span class="lista__valor muted">{{ c.valor | currency }}</span>
+            <button type="button" class="btn btn-secondary btn-sm" [disabled]="ocupado() === c.id" (click)="reabrir(c)">
+              <app-icon name="undo" [size]="14" /> Reabrir
+            </button>
+            <div class="item-actions">
+              <button type="button" class="btn-icon btn-icon--danger" aria-label="Excluir" title="Excluir" (click)="paraExcluir.set(c)">
+                <app-icon name="trash" [size]="16" />
+              </button>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  }
+</section>
+
+@if (nova()) {
+  <app-plano-dialog modo="conta" (closed)="nova.set(false)" />
+}
+
+@if (emEdicao(); as c) {
+  <app-plano-dialog modo="conta" [conta]="c" (closed)="emEdicao.set(null)" />
+}
+
+@if (paraExcluir(); as c) {
+  <app-confirm-dialog
+    [title]="'Excluir “' + c.descricao + '”?'"
+    [message]="c.pagoEm ? 'A conta sai da lista, mas o lançamento do pagamento continua no extrato.' : 'A conta será removida.'"
+    [busy]="ocupado() === c.id"
+    (confirmed)="excluir(c)"
+    (cancelled)="paraExcluir.set(null)"
+  />
+}

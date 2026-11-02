@@ -1,0 +1,166 @@
+<header class="page-header">
+  <div>
+    <span class="eyebrow">Integrações</span>
+    <h1>Telegram</h1>
+    <p>Registre entradas e despesas mandando uma mensagem, sem abrir o app.</p>
+  </div>
+</header>
+
+@if (error(); as message) {
+  <div class="alert alert-error" role="alert"><app-icon name="alert" /> {{ message }}</div>
+}
+
+<div class="layout">
+  <section class="card connect">
+    @if (loading() && !status()) {
+      <div class="skeleton skeleton--block"></div>
+    } @else if (status(); as s) {
+      @if (!s.botAtivo) {
+        <div class="alert alert-warning" role="status">
+          <app-icon name="alert" />
+          <div>
+            <strong>O bot ainda não está ligado no servidor.</strong>
+            Defina <code>TELEGRAM_BOT_TOKEN</code> e <code>TELEGRAM_BOT_USERNAME</code> na API e reinicie.
+            Você já pode gerar o código e usá-lo assim que o bot estiver no ar.
+          </div>
+        </div>
+      }
+
+      @if (s.vinculado) {
+        <div class="connected">
+          <div class="connected__badge">
+            <span class="chip-icon chip-icon--success"><app-icon name="check" /></span>
+            <div>
+              <strong>Telegram conectado</strong>
+              <span>Desde {{ s.vinculadoEm | date: "d 'de' MMMM 'às' HH:mm" }}</span>
+            </div>
+          </div>
+          <p class="muted">
+            Mande suas despesas e entradas para
+            @if (s.botUsername) {
+              <a [href]="'https://t.me/' + s.botUsername" target="_blank" rel="noopener">&#64;{{ s.botUsername }}</a>
+            } @else {
+              o bot
+            }
+            e elas aparecem aqui na hora. Use <code>/saldo</code> no chat para ver o resumo do mês.
+          </p>
+          <div class="actions">
+            @if (s.botUsername) {
+              <a class="btn btn-primary" [href]="'https://t.me/' + s.botUsername" target="_blank" rel="noopener">
+                <app-icon name="send" /> Abrir o bot
+              </a>
+            }
+            <button type="button" class="btn btn-secondary" [disabled]="desvinculando()" (click)="desvincular()">
+              <app-icon name="logout" /> Desconectar
+            </button>
+          </div>
+        </div>
+      } @else {
+        <div class="connect__intro">
+          <span class="chip-icon chip-icon--info"><app-icon name="link" /></span>
+          <div>
+            <h2>Conecte sua conta</h2>
+            <p class="muted">Leva menos de um minuto e só precisa ser feito uma vez.</p>
+          </div>
+        </div>
+
+        <ol class="steps">
+          <li [class.steps__item--done]="!!codigo()">
+            <span class="steps__number">1</span>
+            <div class="steps__body">
+              <strong>Gere um código de conexão</strong>
+              <span class="muted">Ele vale por 10 minutos.</span>
+              @if (!codigo() || expirado()) {
+                <button type="button" class="btn btn-primary" [disabled]="gerando()" (click)="gerarCodigo()">
+                  @if (gerando()) {
+                    <span class="spinner"></span> Gerando...
+                  } @else {
+                    <app-icon name="sparkles" /> {{ expirado() ? 'Gerar novo código' : 'Gerar código' }}
+                  }
+                </button>
+              }
+            </div>
+          </li>
+
+          <li>
+            <span class="steps__number">2</span>
+            <div class="steps__body">
+              <strong>Envie o código para o bot</strong>
+              @if (codigo(); as c) {
+                @if (!expirado()) {
+                  <div class="code">
+                    <span class="code__value">{{ c.codigo }}</span>
+                    <span class="code__timer tabular">expira em {{ tempoRestante() }}</span>
+                  </div>
+                  <div class="actions">
+                    @if (c.link) {
+                      <a class="btn btn-primary" [href]="c.link" target="_blank" rel="noopener">
+                        <app-icon name="send" /> Abrir no Telegram
+                      </a>
+                    }
+                    <button type="button" class="btn btn-secondary" (click)="copiarCodigo()">
+                      <app-icon name="copy" /> Copiar comando
+                    </button>
+                  </div>
+                  <span class="muted small">
+                    @if (c.link) {
+                      O botão já envia o código. Se preferir, mande <code>/vincular {{ c.codigo }}</code> ao bot.
+                    } @else {
+                      Mande <code>/vincular {{ c.codigo }}</code> ao bot.
+                    }
+                  </span>
+                } @else {
+                  <span class="muted">O código expirou. Gere um novo acima.</span>
+                }
+              } @else {
+                <span class="muted">O código aparece aqui depois do passo 1.</span>
+              }
+            </div>
+          </li>
+
+          <li>
+            <span class="steps__number">3</span>
+            <div class="steps__body">
+              <strong>Pronto!</strong>
+              @if (codigo() && !expirado()) {
+                <span class="waiting"><span class="spinner"></span> Aguardando a confirmação do Telegram...</span>
+              } @else {
+                <span class="muted">Esta página atualiza sozinha quando a conta for conectada.</span>
+              }
+            </div>
+          </li>
+        </ol>
+      }
+    }
+  </section>
+
+  <aside class="card chat" aria-label="Exemplos de mensagens">
+    <header class="chat__header">
+      <img src="favicon.svg" alt="" width="36" height="36" />
+      <div>
+        <strong>Nick Finance</strong>
+        <span>bot</span>
+      </div>
+    </header>
+
+    <div class="chat__body">
+      @for (exemplo of exemplos; track exemplo.mensagem) {
+        <div class="bubble bubble--user">{{ exemplo.mensagem }}</div>
+        <div class="bubble bubble--bot">
+          <span [class]="'dot dot--' + exemplo.tipo"></span>
+          {{ exemplo.resultado }}
+        </div>
+      }
+    </div>
+
+    <footer class="chat__footer">
+      <strong>Dicas</strong>
+      <ul>
+        <li>Comece com <em>gastei</em>, <em>paguei</em> ou <em>recebi</em>, ou use <em>+</em> e <em>−</em> no valor.</li>
+        <li>Sem palavra-chave, a mensagem vira despesa.</li>
+        <li>Use <em>no</em>/<em>na</em> para o estabelecimento e <em>da</em>/<em>do</em> para a origem da entrada.</li>
+        <li>Errou? Toque em <em>Desfazer</em> na resposta do bot.</li>
+      </ul>
+    </footer>
+  </aside>
+</div>

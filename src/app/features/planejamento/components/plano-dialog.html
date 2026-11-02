@@ -1,0 +1,104 @@
+<app-modal
+  [title]="editando() ? textos().editar : textos().novo"
+  [subtitle]="textos().subtitulo"
+  [icon]="modo() === 'recorrencia' ? 'repeat' : 'calendar'"
+  [tone]="tipoAtual() === 'receita' ? 'success' : 'danger'"
+  (closed)="closed.emit()"
+>
+  <form class="form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <div class="tabs tabs--full" role="radiogroup" aria-label="Tipo">
+      @for (tipo of tipos; track tipo) {
+        <button
+          type="button"
+          role="radio"
+          class="tabs__item"
+          [class.tabs__item--active]="tipoAtual() === tipo"
+          [attr.aria-checked]="tipoAtual() === tipo"
+          (click)="selecionarTipo(tipo)"
+        >
+          <app-icon [name]="tipo === 'receita' ? 'arrowUpRight' : 'arrowDownRight'" [size]="16" />
+          {{ textos().tipos[tipo] }}
+        </button>
+      }
+    </div>
+
+    @if (error(); as message) {
+      <div class="alert alert-error" role="alert"><app-icon name="alert" /> {{ message }}</div>
+    }
+
+    <div class="field">
+      <label for="descricao">Descrição</label>
+      <input
+        id="descricao"
+        class="input"
+        formControlName="descricao"
+        [placeholder]="tipoAtual() === 'receita' ? 'Ex.: Salário' : 'Ex.: Aluguel'"
+      />
+      @if (form.controls.descricao.touched && form.controls.descricao.invalid) {
+        <span class="field-error">Informe a descrição.</span>
+      }
+    </div>
+
+    <div class="form-row">
+      <div class="field">
+        <label for="valor">Valor</label>
+        <div class="input-prefix">
+          <span>R$</span>
+          <input id="valor" class="input tabular" appCurrencyInput formControlName="valor" placeholder="0,00" />
+        </div>
+        @if (form.controls.valor.touched && form.controls.valor.invalid) {
+          <span class="field-error">Informe um valor maior que zero.</span>
+        }
+      </div>
+
+      @if (modo() === 'recorrencia') {
+        <div class="field">
+          <label for="dia">Todo dia</label>
+          <input id="dia" class="input" type="number" min="1" max="31" formControlName="diaDoMes" />
+          @if (form.controls.diaDoMes.touched && form.controls.diaDoMes.invalid) {
+            <span class="field-error">Um dia entre 1 e 31.</span>
+          }
+        </div>
+      } @else {
+        <div class="field">
+          <label for="vencimento">Vencimento</label>
+          <input id="vencimento" class="input" type="date" formControlName="vencimento" />
+        </div>
+      }
+    </div>
+
+    <div class="form-row">
+      <div class="field">
+        <label for="categoria">Categoria</label>
+        <select id="categoria" class="input" formControlName="categoriaId">
+          <option [ngValue]="null">Sem categoria</option>
+          @for (categoria of categorias(); track categoria.id) {
+            <option [ngValue]="categoria.id">{{ categoria.nome }}</option>
+          }
+        </select>
+      </div>
+      <div class="field">
+        <label for="detalhe">
+          {{ tipoAtual() === 'receita' ? 'Origem' : 'Estabelecimento' }} <span class="muted">(opcional)</span>
+        </label>
+        <input id="detalhe" class="input" formControlName="detalhe" />
+      </div>
+    </div>
+
+    @if (modo() === 'recorrencia') {
+      <p class="muted small-note">
+        Dias 29 a 31 usam o último dia nos meses mais curtos. Se o dia deste mês já passou, o primeiro lançamento será no mês que vem.
+      </p>
+    }
+
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="closed.emit()">Cancelar</button>
+      <button type="submit" class="btn btn-primary" [disabled]="submitting()">
+        @if (submitting()) {
+          <span class="spinner"></span>
+        }
+        {{ editando() ? 'Salvar alterações' : 'Cadastrar' }}
+      </button>
+    </div>
+  </form>
+</app-modal>

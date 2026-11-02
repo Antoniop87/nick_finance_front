@@ -1,0 +1,249 @@
+<header class="page-header">
+  <div>
+    <h1>{{ copy().title }}</h1>
+    <p>{{ copy().subtitle }}</p>
+  </div>
+  <div class="page-actions">
+    <button type="button" class="btn btn-secondary" [disabled]="!sorted().length" (click)="exportCsv()">
+      <app-icon name="download" /> Exportar CSV
+    </button>
+    <button type="button" class="btn btn-primary" (click)="dialogOpen.set(true)">
+      <app-icon name="plus" /> {{ novoLabel() }}
+    </button>
+  </div>
+</header>
+
+@if (facade.error(); as error) {
+  <div class="alert alert-error error-banner" role="alert">
+    <app-icon name="alert" />
+    <span>{{ error }}</span>
+    <button type="button" class="btn btn-secondary" (click)="facade.load(true)">
+      <app-icon name="refresh" /> Tentar novamente
+    </button>
+  </div>
+}
+
+<section class="stats" aria-label="Resumo do período">
+  @if (isTodos()) {
+    <article class="card stat">
+      <span class="chip-icon chip-icon--success"><app-icon name="arrowUpRight" /></span>
+      <div>
+        <span class="stat__label">Entrou</span>
+        <strong class="stat__value display-number">{{ resumo().entradas | currency }}</strong>
+      </div>
+    </article>
+    <article class="card stat">
+      <span class="chip-icon chip-icon--danger"><app-icon name="arrowDownRight" /></span>
+      <div>
+        <span class="stat__label">Saiu</span>
+        <strong class="stat__value display-number">{{ resumo().saidas | currency }}</strong>
+      </div>
+    </article>
+    <article class="card stat stat--highlight">
+      <span class="chip-icon"><app-icon name="wallet" /></span>
+      <div>
+        <span class="stat__label">Saldo</span>
+        <strong class="stat__value display-number" [class.negative]="resumo().saldo < 0">
+          {{ resumo().saldo | currency }}
+        </strong>
+      </div>
+    </article>
+  } @else {
+    <article class="card stat">
+      <span [class]="tipo() === 'receita' ? 'chip-icon chip-icon--success' : 'chip-icon chip-icon--danger'">
+        <app-icon [name]="tipo() === 'receita' ? 'arrowUpRight' : 'arrowDownRight'" />
+      </span>
+      <div>
+        <span class="stat__label">Total</span>
+        <strong class="stat__value display-number">{{ total() | currency }}</strong>
+      </div>
+    </article>
+    <article class="card stat">
+      <span class="chip-icon chip-icon--info"><app-icon name="receipt" /></span>
+      <div>
+        <span class="stat__label">Lançamentos</span>
+        <strong class="stat__value display-number">{{ filtered().length }}</strong>
+      </div>
+    </article>
+    <article class="card stat">
+      <span class="chip-icon chip-icon--warning"><app-icon name="pieChart" /></span>
+      <div>
+        <span class="stat__label">Valor médio</span>
+        <strong class="stat__value display-number">{{ media() | currency }}</strong>
+      </div>
+    </article>
+  }
+</section>
+
+<section class="card">
+  <div class="toolbar">
+    <div class="input-prefix search">
+      <app-icon name="search" />
+      <label for="busca" class="sr-only">Buscar</label>
+      <input
+        id="busca"
+        class="input"
+        type="search"
+        placeholder="Buscar por descrição, origem ou estabelecimento"
+        [value]="search()"
+        (input)="onSearch($event)"
+      />
+    </div>
+
+    <div class="input-prefix month">
+      <app-icon name="calendar" />
+      <label for="mes" class="sr-only">Mês</label>
+      <select id="mes" class="input" [value]="month()" (change)="onMonthChange($event)">
+        <option value="">Todos os meses</option>
+        @for (key of months(); track key) {
+          <option [value]="key">{{ monthLabel(key) }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="input-prefix categoria-filtro">
+      <app-icon name="tag" />
+      <label for="filtro-categoria" class="sr-only">Categoria</label>
+      <select id="filtro-categoria" class="input" [value]="categoriaFiltro()" (change)="onCategoriaChange($event)">
+        <option value="">Todas as categorias</option>
+        <option value="sem">Sem categoria</option>
+        @for (categoria of categoriasDisponiveis(); track categoria.id) {
+          <option [value]="categoria.id">{{ rotuloCategoria(categoria) }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  @if (showSkeleton()) {
+    <div class="card-body skeleton-list">
+      @for (i of [1, 2, 3, 4, 5]; track i) {
+        <div class="skeleton skeleton--row"></div>
+      }
+    </div>
+  } @else if (!sorted().length) {
+    @if (hasFilters()) {
+      <app-empty-state icon="search" title="Nada encontrado" description="Tente outro termo ou outro mês.">
+        <button type="button" class="btn btn-secondary" (click)="clearFilters()">Limpar filtros</button>
+      </app-empty-state>
+    } @else if (facade.loaded()) {
+      <app-empty-state icon="receipt" [title]="copy().emptyTitle" [description]="copy().emptyDescription">
+        <button type="button" class="btn btn-primary" (click)="dialogOpen.set(true)">
+          <app-icon name="plus" /> {{ novoLabel() }}
+        </button>
+      </app-empty-state>
+    }
+  } @else {
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col" [attr.aria-sort]="ariaSort('descricao')">
+            <button type="button" class="sort" (click)="toggleSort('descricao')">Descrição <app-icon name="sort" [size]="14" /></button>
+          </th>
+          <th scope="col" class="col-detalhe">{{ copy().detalheLabel }}</th>
+          <th scope="col" class="col-data" [attr.aria-sort]="ariaSort('data')">
+            <button type="button" class="sort" (click)="toggleSort('data')">Data <app-icon name="sort" [size]="14" /></button>
+          </th>
+          <th scope="col" class="col-valor" [attr.aria-sort]="ariaSort('valor')">
+            <button type="button" class="sort" (click)="toggleSort('valor')">Valor <app-icon name="sort" [size]="14" /></button>
+          </th>
+          <th scope="col" class="col-acoes"><span class="sr-only">Ações</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (lancamento of pageItems(); track lancamento.key) {
+          <tr>
+            <td>
+              <div class="descricao">
+                @let categoria = categoriaDe(lancamento);
+                <app-categoria-badge [categoria]="categoria" />
+                <div class="descricao__text">
+                  <strong>{{ lancamento.descricao }}</strong>
+                  <span class="descricao__meta">
+                    {{ categoria?.nome ?? 'Sem categoria' }}
+                    <span class="detalhe-mobile">
+                      @if (lancamento.detalhe) {
+                        · {{ lancamento.detalhe }}
+                      }
+                      · {{ lancamento.data | date: 'dd/MM' }}
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </td>
+            <td class="col-detalhe">
+              @if (lancamento.detalhe) {
+                {{ lancamento.detalhe }}
+              } @else {
+                <span class="muted">—</span>
+              }
+            </td>
+            <td class="col-data tabular nowrap muted">{{ lancamento.data | date: "d 'de' MMM yyyy" }}</td>
+            <td
+              class="col-valor tabular nowrap"
+              [class.positive]="lancamento.tipo === 'receita'"
+              [class.negative]="isTodos() && lancamento.tipo === 'despesa'"
+            >
+              @if (isTodos()) {
+                {{ lancamento.tipo === 'receita' ? '+' : '−' }}
+              }
+              {{ lancamento.valor | currency }}
+            </td>
+            <td class="col-acoes">
+              <div class="acoes">
+                <button type="button" class="btn-icon" aria-label="Editar" title="Editar" (click)="emEdicao.set(lancamento)">
+                  <app-icon name="pencil" [size]="16" />
+                </button>
+                <button
+                  type="button"
+                  class="btn-icon btn-icon--danger"
+                  aria-label="Excluir"
+                  title="Excluir"
+                  (click)="paraExcluir.set(lancamento)"
+                >
+                  <app-icon name="trash" [size]="16" />
+                </button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <footer class="pagination">
+      <span class="muted">{{ rangeLabel() }}</span>
+      <div class="pagination__controls">
+        <button type="button" class="btn-icon" aria-label="Página anterior" [disabled]="page() === 1" (click)="goToPage(page() - 1)">
+          <app-icon name="chevronLeft" />
+        </button>
+        <span class="tabular">{{ page() }} / {{ pageCount() }}</span>
+        <button
+          type="button"
+          class="btn-icon"
+          aria-label="Próxima página"
+          [disabled]="page() === pageCount()"
+          (click)="goToPage(page() + 1)"
+        >
+          <app-icon name="chevronRight" />
+        </button>
+      </div>
+    </footer>
+  }
+</section>
+
+@if (dialogOpen()) {
+  <app-lancamento-dialog [tipo]="dialogTipo()" (closed)="dialogOpen.set(false)" />
+}
+
+@if (emEdicao(); as lancamento) {
+  <app-lancamento-dialog [lancamento]="lancamento" (closed)="emEdicao.set(null)" />
+}
+
+@if (paraExcluir(); as lancamento) {
+  <app-confirm-dialog
+    [title]="tituloExclusao(lancamento)"
+    [message]="mensagemExclusao(lancamento)"
+    [busy]="excluindo()"
+    (confirmed)="excluir(lancamento)"
+    (cancelled)="paraExcluir.set(null)"
+  />
+}

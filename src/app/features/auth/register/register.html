@@ -1,0 +1,102 @@
+<app-auth-layout title="Crie sua conta" subtitle="Leva menos de um minuto.">
+  <form class="form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    @if (error(); as message) {
+      <div class="alert alert-error" role="alert"><app-icon name="alert" /> {{ message }}</div>
+    }
+
+    <div class="form-row">
+      <div class="field">
+        <label for="nome">Nome</label>
+        <input id="nome" class="input" formControlName="nome" autocomplete="given-name" />
+        @if (form.controls.nome.touched && form.controls.nome.invalid) {
+          <span class="field-error">Informe seu nome.</span>
+        }
+      </div>
+
+      <div class="field">
+        <label for="sobrenome">Sobrenome</label>
+        <input id="sobrenome" class="input" formControlName="sobrenome" autocomplete="family-name" />
+        @if (form.controls.sobrenome.touched && form.controls.sobrenome.invalid) {
+          <span class="field-error">Informe seu sobrenome.</span>
+        }
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="email">E-mail</label>
+      <input
+        id="email"
+        class="input"
+        type="email"
+        formControlName="email"
+        autocomplete="email"
+        placeholder="voce@email.com"
+      />
+      @if (form.controls.email.touched && form.controls.email.invalid) {
+        <span class="field-error">Informe um e-mail válido.</span>
+      }
+    </div>
+
+    <div class="field">
+      <label for="dataNascimento">Data de nascimento</label>
+      <input id="dataNascimento" class="input" type="date" formControlName="dataNascimento" autocomplete="bday" />
+      @if (form.controls.dataNascimento.touched && form.controls.dataNascimento.invalid) {
+        <span class="field-error">
+          {{ form.controls.dataNascimento.hasError('futureDate') ? 'A data não pode estar no futuro.' : 'Informe sua data de nascimento.' }}
+        </span>
+      }
+    </div>
+
+    <div class="form-row">
+      <div class="field">
+        <label for="password">Senha</label>
+        <div class="input-group">
+          <input
+            id="password"
+            class="input"
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            autocomplete="new-password"
+          />
+          <button
+            type="button"
+            class="btn-icon"
+            [attr.aria-label]="showPassword() ? 'Ocultar senha' : 'Mostrar senha'"
+            (click)="showPassword.set(!showPassword())"
+          >
+            <app-icon [name]="showPassword() ? 'eyeOff' : 'eye'" />
+          </button>
+        </div>
+        @if (form.controls.password.touched && form.controls.password.invalid) {
+          <span class="field-error">Mínimo de {{ passwordMinLength }} caracteres.</span>
+        }
+      </div>
+
+      <div class="field">
+        <label for="confirmPassword">Confirmar senha</label>
+        <input
+          id="confirmPassword"
+          class="input"
+          [type]="showPassword() ? 'text' : 'password'"
+          formControlName="confirmPassword"
+          autocomplete="new-password"
+        />
+        @if (form.controls.confirmPassword.touched && form.hasError('fieldsMismatch')) {
+          <span class="field-error">As senhas não conferem.</span>
+        }
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-block btn-lg" [disabled]="submitting()">
+      @if (submitting()) {
+        <span class="spinner"></span> Criando conta...
+      } @else {
+        Criar conta
+      }
+    </button>
+
+    <p class="form-footer muted">
+      Já tem conta? <a routerLink="/login">Entrar</a>
+    </p>
+  </form>
+</app-auth-layout>

@@ -1,0 +1,84 @@
+<section class="card">
+  <header class="card-header">
+    <div>
+      <h2>Próximas contas</h2>
+      <p>Em aberto, por vencimento</p>
+    </div>
+    <a routerLink="/contas" class="see-all">Ver todas <app-icon name="chevronRight" [size]="16" /></a>
+  </header>
+  <div class="card-body">
+    @if (proximasContas().length) {
+      <ul class="lista">
+        @for (item of proximasContas(); track item.conta.id) {
+          <li>
+            <app-categoria-badge [categoria]="categoriaDe(item.conta.categoriaId)" size="sm" />
+            <div class="lista__info">
+              <strong class="truncate">{{ item.conta.descricao }}</strong>
+              <span [class.atrasada]="item.situacao === 'atrasada'" [class.hoje]="item.situacao === 'hoje'">
+                @switch (item.situacao) {
+                  @case ('atrasada') {
+                    Atrasada desde {{ item.conta.vencimento | date: 'dd/MM' }}
+                  }
+                  @case ('hoje') {
+                    Vence hoje
+                  }
+                  @default {
+                    Vence {{ item.conta.vencimento | date: "d 'de' MMM" }}
+                  }
+                }
+              </span>
+            </div>
+            <strong class="tabular" [class.positive]="item.conta.tipo === 'receita'">
+              {{ item.conta.tipo === 'receita' ? '+' : '−' }} {{ item.conta.valor | currency }}
+            </strong>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="vazio">
+        <app-icon name="checkSquare" [size]="18" /> Nenhuma conta em aberto.
+        <a routerLink="/contas">Cadastrar</a>
+      </p>
+    }
+  </div>
+</section>
+
+<section class="card">
+  <header class="card-header">
+    <div>
+      <h2>Orçamentos do mês</h2>
+      <p>{{ hoje | date: 'MMMM' }}</p>
+    </div>
+    <a routerLink="/orcamentos" class="see-all">Ver todos <app-icon name="chevronRight" [size]="16" /></a>
+  </header>
+  <div class="card-body">
+    @if (orcamentosDoMes().length) {
+      <ul class="orcamentos">
+        @for (item of orcamentosDoMes(); track item.orcamento.id) {
+          <li>
+            <div class="orcamentos__linha">
+              <app-categoria-badge [categoria]="item.categoria" [showName]="true" size="sm" />
+              <span class="tabular">
+                {{ item.situacao.gasto | currency: 'BRL' : 'symbol' : '1.0-0' }} /
+                {{ item.orcamento.valorLimite | currency: 'BRL' : 'symbol' : '1.0-0' }}
+              </span>
+            </div>
+            <div class="progress">
+              <div
+                class="progress__bar"
+                [class.progress__bar--warning]="item.situacao.status === 'alerta'"
+                [class.progress__bar--danger]="item.situacao.status === 'estourado'"
+                [style.width.%]="item.situacao.percentual > 100 ? 100 : item.situacao.percentual"
+              ></div>
+            </div>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="vazio">
+        <app-icon name="pieChart" [size]="18" /> Nenhum orçamento definido.
+        <a routerLink="/orcamentos">Criar</a>
+      </p>
+    }
+  </div>
+</section>

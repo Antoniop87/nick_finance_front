@@ -1,0 +1,65 @@
+<app-auth-layout title="Bem-vindo de volta" subtitle="Entre para acompanhar suas finanças.">
+  <form class="form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    @if (sessionExpired() && !error()) {
+      <div class="alert alert-info" role="status">
+        <app-icon name="alert" /> Sua sessão expirou. Entre novamente.
+      </div>
+    }
+
+    @if (error(); as message) {
+      <div class="alert alert-error" role="alert"><app-icon name="alert" /> {{ message }}</div>
+    }
+
+    <div class="field">
+      <label for="email">E-mail</label>
+      <input
+        id="email"
+        class="input"
+        type="email"
+        formControlName="email"
+        autocomplete="email"
+        placeholder="voce@email.com"
+      />
+      @if (form.controls.email.touched && form.controls.email.invalid) {
+        <span class="field-error">Informe um e-mail válido.</span>
+      }
+    </div>
+
+    <div class="field">
+      <label for="password">Senha</label>
+      <div class="input-group">
+        <input
+          id="password"
+          class="input"
+          [type]="showPassword() ? 'text' : 'password'"
+          formControlName="password"
+          autocomplete="current-password"
+          placeholder="Sua senha"
+        />
+        <button
+          type="button"
+          class="btn-icon"
+          [attr.aria-label]="showPassword() ? 'Ocultar senha' : 'Mostrar senha'"
+          (click)="showPassword.set(!showPassword())"
+        >
+          <app-icon [name]="showPassword() ? 'eyeOff' : 'eye'" />
+        </button>
+      </div>
+      @if (form.controls.password.touched && form.controls.password.invalid) {
+        <span class="field-error">Informe sua senha.</span>
+      }
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-block btn-lg" [disabled]="submitting()">
+      @if (submitting()) {
+        <span class="spinner"></span> Entrando...
+      } @else {
+        Entrar
+      }
+    </button>
+
+    <p class="form-footer muted">
+      Ainda não tem conta? <a routerLink="/cadastro">Criar conta</a>
+    </p>
+  </form>
+</app-auth-layout>

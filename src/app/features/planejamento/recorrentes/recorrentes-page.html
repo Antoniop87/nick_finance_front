@@ -1,0 +1,122 @@
+<header class="page-header">
+  <div>
+    <span class="eyebrow">Planejamento</span>
+    <h1>Recorrentes</h1>
+    <p>Salário, aluguel, assinaturas: cadastre uma vez e o lançamento entra sozinho todo mês.</p>
+  </div>
+  <div class="page-actions">
+    <button type="button" class="btn btn-primary" (click)="novo.set(true)">
+      <app-icon name="plus" /> Novo recorrente
+    </button>
+  </div>
+</header>
+
+@if (store.error(); as error) {
+  <div class="alert alert-error" role="alert"><app-icon name="alert" /> {{ error }}</div>
+}
+
+<section class="summary-grid">
+  <article class="card summary-card">
+    <span class="chip-icon chip-icon--success"><app-icon name="arrowUpRight" /></span>
+    <div>
+      <span>Entradas fixas por mês</span>
+      <strong class="display-number">{{ totais().entradas | currency }}</strong>
+    </div>
+  </article>
+  <article class="card summary-card">
+    <span class="chip-icon chip-icon--danger"><app-icon name="arrowDownRight" /></span>
+    <div>
+      <span>Gastos fixos por mês</span>
+      <strong class="display-number">{{ totais().saidas | currency }}</strong>
+    </div>
+  </article>
+  <article class="card summary-card">
+    <span class="chip-icon"><app-icon name="repeat" /></span>
+    <div>
+      <span>Sobra fixa por mês</span>
+      <strong class="display-number" [class.negative]="totais().saldo < 0">{{ totais().saldo | currency }}</strong>
+    </div>
+  </article>
+</section>
+
+<section class="card">
+  @if (store.loading() && !store.items().length) {
+    @for (i of [1, 2, 3]; track i) {
+      <div class="skeleton skeleton--row"></div>
+    }
+  } @else if (!store.items().length) {
+    <app-empty-state
+      icon="repeat"
+      title="Nenhum lançamento recorrente"
+      description="Cadastre o que se repete todo mês e pare de lançar à mão."
+    >
+      <button type="button" class="btn btn-primary" (click)="novo.set(true)">
+        <app-icon name="plus" /> Cadastrar recorrente
+      </button>
+    </app-empty-state>
+  } @else {
+    <ul class="lista">
+      @for (r of store.items(); track r.id) {
+        <li [class.inativa]="!r.ativa">
+          <app-categoria-badge [categoria]="categoria(r)" />
+          <div class="lista__info">
+            <strong>{{ r.descricao }}</strong>
+            <span>
+              Todo dia {{ r.diaDoMes }} ·
+              @if (r.ativa && r.proximaData) {
+                próximo em {{ r.proximaData | date: "d 'de' MMM" }}
+              } @else {
+                pausado
+              }
+            </span>
+          </div>
+          <span class="lista__valor" [class.positive]="r.tipo === 'receita'" [class.negative]="r.tipo === 'despesa'">
+            {{ r.tipo === 'receita' ? '+' : '−' }} {{ r.valor | currency }}
+          </span>
+          <div class="item-actions">
+            <button
+              type="button"
+              class="btn-icon"
+              [attr.aria-label]="r.ativa ? 'Pausar' : 'Retomar'"
+              [title]="r.ativa ? 'Pausar' : 'Retomar'"
+              [disabled]="ocupado() === r.id"
+              (click)="alternar(r)"
+            >
+              <app-icon [name]="r.ativa ? 'pause' : 'play'" [size]="16" />
+            </button>
+            <button type="button" class="btn-icon" aria-label="Editar" title="Editar" (click)="emEdicao.set(r)">
+              <app-icon name="pencil" [size]="16" />
+            </button>
+            <button
+              type="button"
+              class="btn-icon btn-icon--danger"
+              aria-label="Excluir"
+              title="Excluir"
+              (click)="paraExcluir.set(r)"
+            >
+              <app-icon name="trash" [size]="16" />
+            </button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</section>
+
+@if (novo()) {
+  <app-plano-dialog modo="recorrencia" (closed)="novo.set(false)" />
+}
+
+@if (emEdicao(); as r) {
+  <app-plano-dialog modo="recorrencia" [recorrencia]="r" (closed)="emEdicao.set(null)" />
+}
+
+@if (paraExcluir(); as r) {
+  <app-confirm-dialog
+    [title]="'Excluir “' + r.descricao + '”?'"
+    message="Os próximos lançamentos não serão mais criados. O que já foi lançado continua no extrato."
+    [busy]="ocupado() === r.id"
+    (confirmed)="excluir(r)"
+    (cancelled)="paraExcluir.set(null)"
+  />
+}

@@ -1,0 +1,235 @@
+:host {
+  display: grid;
+  grid-template-columns: minmax(420px, 1fr) minmax(0, 1fr);
+  min-height: 100vh;
+  background: var(--surface);
+
+  @media (max-width: 960px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.15rem;
+  letter-spacing: -0.02em;
+}
+
+// ---------- Lado da marca ----------
+
+.hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 32px;
+  margin: 12px;
+  padding: 36px 40px;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  background: var(--hero-gradient);
+  color: #fff;
+
+  &::before {
+    content: '';
+    position: absolute;
+    width: 520px;
+    height: 520px;
+    right: -200px;
+    top: -180px;
+    border-radius: 50%;
+    border: 1px solid rgb(255 255 255 / 0.08);
+  }
+
+  @media (max-width: 960px) {
+    display: none;
+  }
+
+  h2 {
+    margin: 18px 0 12px;
+    font-size: clamp(2rem, 3vw, 2.6rem);
+    font-weight: 800;
+  }
+
+  p {
+    max-width: 420px;
+    margin: 0;
+    color: rgb(255 255 255 / 0.75);
+    font-size: 1.02rem;
+  }
+}
+
+.hero__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.12);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.hero__features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: rgb(255 255 255 / 0.8);
+  font-size: 0.85rem;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+// ---------- Ilustração ----------
+
+.preview {
+  position: relative;
+  max-width: 420px;
+  margin-top: 40px;
+  padding: 0 0 40px 0;
+}
+
+.preview__card {
+  border: 1px solid rgb(255 255 255 / 0.16);
+  border-radius: var(--radius-lg);
+  background: rgb(255 255 255 / 0.1);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 20px 40px rgb(0 0 0 / 0.2);
+
+  strong {
+    display: block;
+    font-family: var(--font-display);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &--main {
+    padding: 22px;
+
+    strong {
+      margin-top: 4px;
+      font-size: 1.8rem;
+    }
+  }
+
+  &--float {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: rgb(255 255 255 / 0.95);
+    color: #0b1324;
+    animation: float 6s ease-in-out infinite;
+
+    strong {
+      font-size: 0.9rem;
+    }
+
+    .preview__label {
+      color: #5d6b82;
+    }
+  }
+
+  &--in {
+    right: -36px;
+    top: -26px;
+  }
+
+  &--out {
+    left: 30px;
+    bottom: 0;
+    animation-delay: -3s;
+  }
+}
+
+.preview__label {
+  color: rgb(255 255 255 / 0.7);
+  font-size: 0.75rem;
+}
+
+.preview__icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #e8f8f1;
+  color: #059669;
+
+  .preview__card--out & {
+    background: #fff1f3;
+    color: #e11d48;
+  }
+}
+
+.preview__bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 70px;
+  margin-top: 18px;
+
+  span {
+    flex: 1;
+    border-radius: 5px 5px 2px 2px;
+    background: rgb(255 255 255 / 0.25);
+
+    &:last-child {
+      background: #6ee7b7;
+    }
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+// ---------- Formulário ----------
+
+.panel {
+  display: grid;
+  place-items: center;
+  padding: 48px 20px;
+}
+
+.panel__inner {
+  width: min(400px, 100%);
+  animation: fade-up 0.4s var(--ease);
+
+  h1 {
+    margin: 0;
+    font-size: 1.9rem;
+    font-weight: 800;
+  }
+}
+
+.subtitle {
+  margin: 8px 0 32px;
+  color: var(--text-muted);
+}
+
+.brand--mobile {
+  display: none;
+  margin-bottom: 36px;
+
+  @media (max-width: 960px) {
+    display: flex;
+  }
+}

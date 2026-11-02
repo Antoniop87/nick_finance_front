@@ -1,0 +1,83 @@
+<form class="form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  @if (allowTipoChange() && !editando()) {
+    <div class="tipo" role="radiogroup" aria-label="Tipo de lançamento">
+      @for (tipo of tipos; track tipo) {
+        <button
+          type="button"
+          role="radio"
+          [class]="'tipo__option tipo__option--' + tipo"
+          [class.tipo__option--active]="tipoAtual() === tipo"
+          [attr.aria-checked]="tipoAtual() === tipo"
+          (click)="selecionarTipo(tipo)"
+        >
+          <app-icon [name]="tipo === 'receita' ? 'arrowUpRight' : 'arrowDownRight'" [size]="16" />
+          {{ tipoInfo[tipo].singular }}
+        </button>
+      }
+    </div>
+  }
+
+  @if (error(); as message) {
+    <div class="alert alert-error" role="alert"><app-icon name="alert" /> {{ message }}</div>
+  }
+
+  <div class="field">
+    <label for="descricao">Descrição</label>
+    <input id="descricao" class="input" formControlName="descricao" [placeholder]="info().descricaoPlaceholder" />
+    @if (form.controls.descricao.touched && form.controls.descricao.invalid) {
+      <span class="field-error">Informe a descrição (até 100 caracteres).</span>
+    }
+  </div>
+
+  <div class="form-row">
+    <div class="field">
+      <label for="valor">Valor</label>
+      <div class="input-prefix">
+        <span>R$</span>
+        <input id="valor" class="input tabular" appCurrencyInput formControlName="valor" placeholder="0,00" />
+      </div>
+      @if (form.controls.valor.touched && form.controls.valor.invalid) {
+        <span class="field-error">Informe um valor maior que zero.</span>
+      }
+    </div>
+
+    <div class="field">
+      <label for="data">Data</label>
+      <input id="data" class="input" type="date" formControlName="data" />
+      @if (form.controls.data.touched && form.controls.data.invalid) {
+        <span class="field-error">Informe a data.</span>
+      }
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="field">
+      <label for="categoria">Categoria</label>
+      <div class="categoria-select">
+        <app-categoria-badge [categoria]="categoriaSelecionada()" size="sm" />
+        <select id="categoria" class="input" formControlName="categoriaId">
+          <option [ngValue]="null">Sem categoria</option>
+          @for (categoria of categorias(); track categoria.id) {
+            <option [ngValue]="categoria.id">{{ categoria.nome }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="detalhe">{{ info().detalheLabel }} <span class="muted">(opcional)</span></label>
+      <input id="detalhe" class="input" formControlName="detalhe" [placeholder]="info().detalhePlaceholder" />
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button type="button" class="btn btn-secondary" (click)="cancelled.emit()">Cancelar</button>
+    <button type="submit" class="btn btn-primary" [disabled]="submitting()">
+      @if (submitting()) {
+        <span class="spinner"></span> Salvando...
+      } @else {
+        {{ editando() ? 'Salvar alterações' : 'Salvar ' + info().singular.toLowerCase() }}
+      }
+    </button>
+  </div>
+</form>
