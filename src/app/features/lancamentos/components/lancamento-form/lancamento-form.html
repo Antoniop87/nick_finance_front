@@ -70,6 +70,30 @@
     </div>
   </div>
 
+  @if (tipoAtual() === 'despesa') {
+    <div class="field">
+      <span class="label" id="forma-label">Forma de pagamento</span>
+      <div class="formas" role="radiogroup" aria-labelledby="forma-label">
+        @for (forma of formasPagamento; track forma.valor) {
+          <button
+            type="button"
+            role="radio"
+            class="forma"
+            [class.forma--active]="formaSelecionada() === forma.valor"
+            [attr.aria-checked]="formaSelecionada() === forma.valor"
+            (click)="selecionarForma(forma.valor)"
+          >
+            <app-icon [name]="forma.icone" [size]="16" />
+            {{ forma.rotulo }}
+          </button>
+        }
+      </div>
+      @if (faltaFormaPagamento()) {
+        <span class="field-error">Escolha como a despesa foi paga.</span>
+      }
+    </div>
+  }
+
   <div class="form-actions">
     <button type="button" class="btn btn-secondary" (click)="cancelled.emit()">Cancelar</button>
     <button type="submit" class="btn btn-primary" [disabled]="submitting()">

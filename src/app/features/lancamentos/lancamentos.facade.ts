@@ -69,8 +69,8 @@ export class LancamentosFacade {
   }
 }
 
-function toDespesa({ descricao, detalhe, valor, data, categoriaId }: NovoLancamento) {
-  return { descricao, estabelecimento: detalhe, valor, data, categoriaId };
+function toDespesa({ descricao, detalhe, valor, data, categoriaId, formaPagamento }: NovoLancamento) {
+  return { descricao, estabelecimento: detalhe, valor, data, categoriaId, formaPagamento };
 }
 
 function toReceita({ descricao, detalhe, valor, data, categoriaId }: NovoLancamento) {
@@ -87,6 +87,7 @@ function fromDespesa(despesa: Despesa): Lancamento {
     valor: despesa.valor,
     data: despesa.data,
     categoriaId: despesa.categoriaId,
+    formaPagamento: despesa.formaPagamento,
   };
 }
 
@@ -100,5 +101,6 @@ function fromReceita(receita: Receita): Lancamento {
     valor: receita.valor,
     data: receita.data,
     categoriaId: receita.categoriaId,
+    formaPagamento: null,
   };
 }

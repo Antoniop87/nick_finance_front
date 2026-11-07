@@ -14,6 +14,7 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { finalize } from 'rxjs';
 
 import { httpErrorMessage } from '../../../../core/http/http-error';
+import { FORMAS_PAGAMENTO, FORMA_PAGAMENTO_PADRAO, FormaPagamento } from '../../../../core/models/forma-pagamento';
 import { toIsoDate } from '../../../../core/utils/date';
 import { CurrencyInput } from '../../../../shared/ui/currency-input/currency-input';
 import { Icon } from '../../../../shared/ui/icon/icon';
@@ -53,6 +54,7 @@ export class LancamentoForm implements OnInit {
   protected readonly tipos: TipoLancamento[] = ['receita', 'despesa'];
   protected readonly tipoInfo = TIPO_INFO;
   protected readonly categorias = computed(() => this.categoriaStore.doTipo(this.tipoAtual()));
+  protected readonly formasPagamento = FORMAS_PAGAMENTO;
 
   protected readonly form = inject(NonNullableFormBuilder).group({
     descricao: ['', [Validators.required, Validators.maxLength(100)]],
@@ -60,7 +62,15 @@ export class LancamentoForm implements OnInit {
     valor: [null as number | null, [Validators.required, Validators.min(0.01)]],
     data: [toIsoDate(new Date()), Validators.required],
     categoriaId: [null as number | null],
+    // Só vale para despesas; a obrigatoriedade é conferida no envio.
+    formaPagamento: [FORMA_PAGAMENTO_PADRAO as FormaPagamento | null],
   });
+
+  private readonly formaPagamento = toSignal(this.form.controls.formaPagamento.valueChanges, {
+    initialValue: FORMA_PAGAMENTO_PADRAO as FormaPagamento | null,
+  });
+  protected readonly formaSelecionada = computed(() => this.formaPagamento());
+  protected readonly faltaFormaPagamento = signal(false);
 
   private readonly categoriaId = toSignal(this.form.controls.categoriaId.valueChanges, { initialValue: null });
   protected readonly categoriaSelecionada = computed(() => {
@@ -81,8 +91,15 @@ export class LancamentoForm implements OnInit {
         valor: lancamento.valor,
         data: toIsoDate(lancamento.data),
         categoriaId: lancamento.categoriaId,
+        // Despesas antigas não têm forma: o usuário escolhe ao editar.
+        formaPagamento: lancamento.tipo === 'despesa' ? lancamento.formaPagamento : null,
       });
     }
+  }
+
+  protected selecionarForma(forma: FormaPagamento): void {
+    this.form.controls.formaPagamento.setValue(forma);
+    this.faltaFormaPagamento.set(false);
   }
 
   protected selecionarTipo(tipo: TipoLancamento): void {
@@ -94,20 +111,23 @@ export class LancamentoForm implements OnInit {
   }
 
   protected submit(): void {
-    if (this.form.invalid) {
+    const tipo = this.tipoAtual();
+    const { descricao, detalhe, valor, data, categoriaId, formaPagamento } = this.form.getRawValue();
+    const semForma = tipo === 'despesa' && !formaPagamento;
+    this.faltaFormaPagamento.set(semForma);
+    if (this.form.invalid || semForma) {
       this.form.markAllAsTouched();
       return;
     }
 
-    const { descricao, detalhe, valor, data, categoriaId } = this.form.getRawValue();
     const dados = {
       descricao,
       detalhe: detalhe || null,
       valor: valor!,
       data,
       categoriaId: categoriaId == null ? null : Number(categoriaId),
+      formaPagamento: tipo === 'despesa' ? formaPagamento : null,
     };
-    const tipo = this.tipoAtual();
     const existente = this.lancamento();
 
     this.submitting.set(true);

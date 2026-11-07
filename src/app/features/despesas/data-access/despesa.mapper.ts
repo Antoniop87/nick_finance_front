@@ -1,3 +1,4 @@
+import { parseFormaPagamento } from '../../../core/models/forma-pagamento';
 import { parseApiDate } from '../../../core/utils/date';
 import { Despesa, DespesaRequest, DespesaResponse } from './despesa.models';
 
@@ -9,6 +10,7 @@ export function toDespesa(response: DespesaResponse): Despesa {
     valor: Number(response.valor),
     data: parseApiDate(response.data),
     categoriaId: response.categoriaId ?? null,
+    formaPagamento: parseFormaPagamento(response.formaPagamento),
   };
 }
 

@@ -16,7 +16,7 @@ const lancamento = (
   detalhe: string | null = null,
 ): Lancamento => {
   const id = ++nextId;
-  return { key: `${tipo}-${id}`, id, tipo, descricao: `Item ${id}`, detalhe, valor, data, categoriaId: null };
+  return { key: `${tipo}-${id}`, id, tipo, descricao: `Item ${id}`, detalhe, valor, data, categoriaId: null, formaPagamento: null };
 };
 
 describe('lancamento-stats', () => {

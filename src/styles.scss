@@ -406,7 +406,9 @@ a {
   flex-direction: column;
   gap: 6px;
 
-  label {
+  // `.label` para rótulos de grupos (ex.: radiogroup), que não usam <label>.
+  label,
+  .label {
     color: var(--text);
     font-size: 0.82rem;
     font-weight: 600;

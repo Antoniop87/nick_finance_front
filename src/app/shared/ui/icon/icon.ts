@@ -159,6 +159,14 @@ const ICONS = {
     'M22 12h-6l-2 3h-4l-2-3H2',
     'M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z',
   ],
+  creditCard: ['M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z', 'M2 10h20', 'M6 15h4'],
+  banknote: [
+    'M4 6h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z',
+    'M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z',
+    'M6 12h.01',
+    'M18 12h.01',
+  ],
+  pix: ['M12 2.5 21.5 12 12 21.5 2.5 12z', 'M8.5 12 12 8.5 15.5 12 12 15.5z'],
 } satisfies Record<string, string[]>;
 
 export type IconName = keyof typeof ICONS;

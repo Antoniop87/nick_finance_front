@@ -13,6 +13,7 @@ const lancamento = (tipo: 'receita' | 'despesa', valor: number, data: Date, cate
   valor,
   data,
   categoriaId,
+  formaPagamento: null,
 });
 
 const conta = (tipo: 'receita' | 'despesa', valor: number, vencimento: Date, pagoEm: Date | null = null): Compromisso => ({

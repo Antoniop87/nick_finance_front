@@ -1,3 +1,4 @@
+import { FormaPagamento } from '../../core/models/forma-pagamento';
 import { TipoLancamento } from '../../core/models/tipo-lancamento';
 
 export type { TipoLancamento } from '../../core/models/tipo-lancamento';
@@ -17,6 +18,8 @@ export interface Lancamento {
   valor: number;
   data: Date;
   categoriaId: number | null;
+  /** Só despesas; `null` em entradas e em despesas sem a forma informada. */
+  formaPagamento: FormaPagamento | null;
 }
 
 /** Dados do formulário de lançamento (criar ou editar). */
@@ -27,6 +30,8 @@ export interface NovoLancamento {
   /** Formato `yyyy-MM-dd`. */
   data: string;
   categoriaId: number | null;
+  /** Ignorado em entradas. */
+  formaPagamento: FormaPagamento | null;
 }
 
 export interface TipoInfo {

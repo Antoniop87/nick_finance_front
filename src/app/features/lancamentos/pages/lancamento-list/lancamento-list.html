@@ -58,13 +58,23 @@
         <strong class="stat__value display-number">{{ total() | currency }}</strong>
       </div>
     </article>
-    <article class="card stat">
-      <span class="chip-icon chip-icon--info"><app-icon name="receipt" /></span>
-      <div>
-        <span class="stat__label">Lançamentos</span>
-        <strong class="stat__value display-number">{{ filtered().length }}</strong>
-      </div>
-    </article>
+    @if (tipo() === 'despesa') {
+      <article class="card stat">
+        <span class="chip-icon chip-icon--info"><app-icon name="creditCard" /></span>
+        <div>
+          <span class="stat__label">No cartão de crédito</span>
+          <strong class="stat__value display-number">{{ totalCredito() | currency }}</strong>
+        </div>
+      </article>
+    } @else {
+      <article class="card stat">
+        <span class="chip-icon chip-icon--info"><app-icon name="receipt" /></span>
+        <div>
+          <span class="stat__label">Lançamentos</span>
+          <strong class="stat__value display-number">{{ filtered().length }}</strong>
+        </div>
+      </article>
+    }
     <article class="card stat">
       <span class="chip-icon chip-icon--warning"><app-icon name="pieChart" /></span>
       <div>
@@ -112,6 +122,20 @@
         }
       </select>
     </div>
+
+    @if (mostraFormaPagamento()) {
+      <div class="input-prefix forma-filtro">
+        <app-icon name="creditCard" />
+        <label for="filtro-forma" class="sr-only">Forma de pagamento</label>
+        <select id="filtro-forma" class="input" [value]="formaFiltro()" (change)="onFormaChange($event)">
+          <option value="">Todas as formas</option>
+          @for (forma of formasPagamento; track forma.valor) {
+            <option [value]="forma.valor">{{ forma.rotulo }}</option>
+          }
+          <option value="sem">Não informada</option>
+        </select>
+      </div>
+    }
   </div>
 
   @if (showSkeleton()) {
@@ -160,6 +184,11 @@
                   <strong>{{ lancamento.descricao }}</strong>
                   <span class="descricao__meta">
                     {{ categoria?.nome ?? 'Sem categoria' }}
+                    @if (formaDe(lancamento); as forma) {
+                      <span class="forma-tag" [class.forma-tag--credito]="forma.valor === 'CREDITO'">
+                        <app-icon [name]="forma.icone" [size]="12" /> {{ forma.curto }}
+                      </span>
+                    }
                     <span class="detalhe-mobile">
                       @if (lancamento.detalhe) {
                         · {{ lancamento.detalhe }}

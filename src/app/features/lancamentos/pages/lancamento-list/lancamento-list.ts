@@ -17,6 +17,7 @@ import { Icon } from '../../../../shared/ui/icon/icon';
 import { finalize } from 'rxjs';
 
 import { httpErrorMessage } from '../../../../core/http/http-error';
+import { FORMAS_PAGAMENTO, FormaPagamentoInfo, infoFormaPagamento } from '../../../../core/models/forma-pagamento';
 import { ConfirmDialog } from '../../../../shared/ui/confirm-dialog/confirm-dialog';
 import { ToastService } from '../../../../shared/ui/toast/toast.service';
 import { CategoriaBadge } from '../../../categorias/components/categoria-badge/categoria-badge';
@@ -115,6 +116,10 @@ export class LancamentoList implements OnInit {
   protected readonly excluindo = signal(false);
   /** Id da categoria, `sem` (sem categoria) ou vazio (todas). */
   protected readonly categoriaFiltro = signal('');
+  /** Forma de pagamento, `sem` (não informada) ou vazio (todas). Filtrar por ela mostra só despesas. */
+  protected readonly formaFiltro = signal('');
+  protected readonly formasPagamento = FORMAS_PAGAMENTO;
+  protected readonly mostraFormaPagamento = computed(() => this.tipo() !== 'receita');
 
   protected readonly categoriasDisponiveis = computed(() => {
     const tipo = this.tipo();
@@ -138,9 +143,13 @@ export class LancamentoList implements OnInit {
     const term = normalize(this.search());
     const month = this.month();
     const categoria = this.categoriaFiltro();
+    const forma = this.formaFiltro();
     return this.lancamentos().filter(
       (lancamento) =>
         (!month || monthKey(lancamento.data) === month) &&
+        (!forma ||
+          (lancamento.tipo === 'despesa' &&
+            (forma === 'sem' ? lancamento.formaPagamento === null : lancamento.formaPagamento === forma))) &&
         (!categoria ||
           (categoria === 'sem' ? lancamento.categoriaId === null : lancamento.categoriaId === Number(categoria))) &&
         (!term ||
@@ -156,6 +165,9 @@ export class LancamentoList implements OnInit {
   });
 
   protected readonly total = computed(() => sumValores(this.filtered()));
+  protected readonly totalCredito = computed(() =>
+    sumValores(this.filtered().filter((l) => l.tipo === 'despesa' && l.formaPagamento === 'CREDITO')),
+  );
   protected readonly resumo = computed(() => resumo(this.filtered()));
   protected readonly media = computed(() =>
     this.filtered().length ? this.total() / this.filtered().length : 0,
@@ -171,7 +183,9 @@ export class LancamentoList implements OnInit {
     return `${start}–${Math.min(start + PAGE_SIZE - 1, count)} de ${count}`;
   });
 
-  protected readonly hasFilters = computed(() => !!this.search() || !!this.month() || !!this.categoriaFiltro());
+  protected readonly hasFilters = computed(
+    () => !!this.search() || !!this.month() || !!this.categoriaFiltro() || !!this.formaFiltro(),
+  );
   protected readonly showSkeleton = computed(
     () => this.facade.loading() && this.lancamentos().length === 0,
   );
@@ -198,6 +212,15 @@ export class LancamentoList implements OnInit {
   protected onCategoriaChange(event: Event): void {
     this.categoriaFiltro.set((event.target as HTMLSelectElement).value);
     this.page.set(1);
+  }
+
+  protected onFormaChange(event: Event): void {
+    this.formaFiltro.set((event.target as HTMLSelectElement).value);
+    this.page.set(1);
+  }
+
+  protected formaDe(lancamento: Lancamento): FormaPagamentoInfo | null {
+    return infoFormaPagamento(lancamento.formaPagamento);
   }
 
   protected categoriaDe(lancamento: Lancamento): Categoria | null {
@@ -239,6 +262,7 @@ export class LancamentoList implements OnInit {
     this.search.set('');
     this.month.set('');
     this.categoriaFiltro.set('');
+    this.formaFiltro.set('');
     this.page.set(1);
   }
 
@@ -267,13 +291,14 @@ export class LancamentoList implements OnInit {
     const slug = this.copy().title.toLowerCase();
     downloadCsv(
       `nick-finance-${slug}-${suffix}.csv`,
-      ['Data', 'Tipo', 'Descrição', 'Categoria', this.copy().detalheLabel, 'Valor'],
+      ['Data', 'Tipo', 'Descrição', 'Categoria', this.copy().detalheLabel, 'Pagamento', 'Valor'],
       this.sorted().map((lancamento) => [
         formatDate(lancamento.data, 'dd/MM/yyyy', this.locale),
         TIPO_INFO[lancamento.tipo].singular,
         lancamento.descricao,
         this.categoriaDe(lancamento)?.nome ?? '',
         lancamento.detalhe ?? '',
+        this.formaDe(lancamento)?.rotulo ?? '',
         signedValue(lancamento).toFixed(2).replace('.', ','),
       ]),
     );

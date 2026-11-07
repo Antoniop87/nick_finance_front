@@ -78,6 +78,10 @@ export class Dashboard implements OnInit {
   });
 
   protected readonly quantidadeMes = computed(() => this.doMes().length);
+  /** Quanto das saídas do mês foi no cartão de crédito (vai para a fatura). */
+  protected readonly creditoMes = computed(() =>
+    sumValores(this.despesasDoMes().filter((d) => d.formaPagamento === 'CREDITO')),
+  );
   protected readonly ticketMedio = computed(() => {
     const despesas = this.despesasDoMes();
     return despesas.length ? sumValores(despesas) / despesas.length : 0;
