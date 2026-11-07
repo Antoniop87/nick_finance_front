@@ -1,0 +1,97 @@
+<section class="card">
+  <header class="card-header">
+    <div>
+      <h2>Como você pagou</h2>
+      <p>Despesas deste mês</p>
+    </div>
+  </header>
+  <div class="card-body">
+    @if (total() > 0) {
+      <div
+        class="barra"
+        role="img"
+        [attr.aria-label]="
+          'Crédito ' +
+          (partes().credito | percent: '1.0-0') +
+          ', à vista ' +
+          (partes().aVista | percent: '1.0-0')
+        "
+      >
+        @if (resumo().credito > 0) {
+          <span
+            class="barra__parte barra__parte--credito"
+            [style.flex-grow]="partes().credito"
+          ></span>
+        }
+        @if (resumo().aVista > 0) {
+          <span
+            class="barra__parte barra__parte--avista"
+            [style.flex-grow]="partes().aVista"
+          ></span>
+        }
+        @if (resumo().naoInformado > 0) {
+          <span
+            class="barra__parte barra__parte--sem"
+            [style.flex-grow]="partes().naoInformado"
+          ></span>
+        }
+      </div>
+
+      <div class="totais">
+        <article class="total">
+          <span class="chip-icon chip-icon--info"
+            ><app-icon name="creditCard"
+          /></span>
+          <div>
+            <span class="total__label">Cartão de crédito</span>
+            <strong class="total__valor display-number">{{
+              resumo().credito | currency
+            }}</strong>
+            <span class="total__hint"
+              >{{ partes().credito | percent: "1.0-0" }} das despesas · vai para
+              a fatura</span
+            >
+          </div>
+        </article>
+
+        <article class="total">
+          <span class="chip-icon chip-icon--success"
+            ><app-icon name="wallet"
+          /></span>
+          <div>
+            <span class="total__label">Débito, Pix e dinheiro</span>
+            <strong class="total__valor display-number">{{
+              resumo().aVista | currency
+            }}</strong>
+            <span class="total__hint"
+              >{{ partes().aVista | percent: "1.0-0" }} das despesas · saiu na
+              hora</span
+            >
+          </div>
+        </article>
+      </div>
+
+      <ul class="formas">
+        @for (forma of formasAVista; track forma.valor) {
+          <li>
+            <app-icon [name]="forma.icone" [size]="14" />
+            {{ forma.rotulo }}
+            <strong class="tabular">{{
+              resumo().porForma[forma.valor] | currency
+            }}</strong>
+          </li>
+        }
+        @if (resumo().naoInformado > 0) {
+          <li class="formas__sem">
+            Não informado
+            <strong class="tabular">{{
+              resumo().naoInformado | currency
+            }}</strong>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="vazio">Nenhuma despesa neste mês ainda.</p>
+    }
+  </div>
+</section>

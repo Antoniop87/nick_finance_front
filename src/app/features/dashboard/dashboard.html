@@ -162,11 +162,6 @@
       } @else {
         <span class="kpi__hint">Sem gastos no mês anterior</span>
       }
-      @if (creditoMes() > 0) {
-        <span class="kpi__hint kpi__credito">
-          <app-icon name="creditCard" [size]="13" /> {{ creditoMes() | currency }} no cartão de crédito
-        </span>
-      }
     </article>
 
     <article class="card kpi">
@@ -223,6 +218,8 @@
       </div>
     </section>
   </div>
+
+  <app-pagamento-resumo [despesas]="despesasDoMes()" />
 
   <app-planejamento-resumo [despesasDoMes]="despesasDoMes()" />
 

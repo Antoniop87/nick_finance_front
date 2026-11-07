@@ -23,7 +23,7 @@
   </div>
 }
 
-<section class="stats" aria-label="Resumo do período">
+<section class="stats" [class.stats--4]="tipo() === 'despesa'" aria-label="Resumo do período">
   @if (isTodos()) {
     <article class="card stat">
       <span class="chip-icon chip-icon--success"><app-icon name="arrowUpRight" /></span>
@@ -62,8 +62,15 @@
       <article class="card stat">
         <span class="chip-icon chip-icon--info"><app-icon name="creditCard" /></span>
         <div>
-          <span class="stat__label">No cartão de crédito</span>
-          <strong class="stat__value display-number">{{ totalCredito() | currency }}</strong>
+          <span class="stat__label">Cartão de crédito</span>
+          <strong class="stat__value display-number">{{ pagamento().credito | currency }}</strong>
+        </div>
+      </article>
+      <article class="card stat">
+        <span class="chip-icon chip-icon--success"><app-icon name="wallet" /></span>
+        <div>
+          <span class="stat__label">Débito, Pix e dinheiro</span>
+          <strong class="stat__value display-number">{{ pagamento().aVista | currency }}</strong>
         </div>
       </article>
     } @else {

@@ -1,3 +1,4 @@
+import { FormaPagamento } from '../../core/models/forma-pagamento';
 import { addMonths, monthKey } from '../../core/utils/date';
 import { Lancamento } from './lancamento.models';
 
@@ -29,6 +30,17 @@ export interface DetalheTotal {
   quantidade: number;
 }
 
+/** Despesas separadas pela forma de pagamento. */
+export interface ResumoPagamento {
+  /** Cartão de crédito: vai para a fatura. */
+  credito: number;
+  /** Débito, Pix e dinheiro somados: saiu da conta na hora. */
+  aVista: number;
+  /** Despesas antigas ou lançadas sem a forma. */
+  naoInformado: number;
+  porForma: Record<FormaPagamento, number>;
+}
+
 /** Soma em centavos para não acumular erro de ponto flutuante. */
 export function sumValores(items: readonly Valorado[]): number {
   const cents = items.reduce((sum, item) => sum + Math.round(item.valor * 100), 0);
@@ -44,6 +56,24 @@ export function resumo(lancamentos: readonly Lancamento[]): Resumo {
   const entradas = sumValores(lancamentos.filter((l) => l.tipo === 'receita'));
   const saidas = sumValores(lancamentos.filter((l) => l.tipo === 'despesa'));
   return { entradas, saidas, saldo: Math.round((entradas - saidas) * 100) / 100 };
+}
+
+/** Quanto das despesas foi no crédito e quanto foi à vista (débito, Pix e dinheiro). Entradas são ignoradas. */
+export function resumoPagamento(lancamentos: readonly Lancamento[]): ResumoPagamento {
+  const despesas = lancamentos.filter((l) => l.tipo === 'despesa');
+  const da = (forma: FormaPagamento) => sumValores(despesas.filter((d) => d.formaPagamento === forma));
+  const porForma: Record<FormaPagamento, number> = {
+    PIX: da('PIX'),
+    DEBITO: da('DEBITO'),
+    DINHEIRO: da('DINHEIRO'),
+    CREDITO: da('CREDITO'),
+  };
+  return {
+    credito: porForma.CREDITO,
+    aVista: sumValores([{ valor: porForma.PIX }, { valor: porForma.DEBITO }, { valor: porForma.DINHEIRO }]),
+    naoInformado: sumValores(despesas.filter((d) => d.formaPagamento === null)),
+    porForma,
+  };
 }
 
 /** Resumo dos últimos `months` meses até `reference` (inclusive), do mais antigo ao mais recente. */

@@ -13,6 +13,7 @@ import { CompromissoStore, OrcamentoStore, RecorrenciaStore } from '../planejame
 import { projecaoDoMes } from '../planejamento/planejamento-calculos';
 import { CashflowChart } from './cashflow-chart/cashflow-chart';
 import { CategoriaDonut } from './categoria-donut/categoria-donut';
+import { PagamentoResumo } from './pagamento-resumo/pagamento-resumo';
 import { PlanejamentoResumo } from './planejamento-resumo/planejamento-resumo';
 import { Lancamento, TipoLancamento } from '../lancamentos/lancamento.models';
 import { LancamentosFacade } from '../lancamentos/lancamentos.facade';
@@ -32,6 +33,7 @@ const ULTIMOS_LANCAMENTOS = 6;
     CategoriaDonut,
     CategoriaBadge,
     PlanejamentoResumo,
+    PagamentoResumo,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './dashboard.html',
@@ -78,10 +80,6 @@ export class Dashboard implements OnInit {
   });
 
   protected readonly quantidadeMes = computed(() => this.doMes().length);
-  /** Quanto das saídas do mês foi no cartão de crédito (vai para a fatura). */
-  protected readonly creditoMes = computed(() =>
-    sumValores(this.despesasDoMes().filter((d) => d.formaPagamento === 'CREDITO')),
-  );
   protected readonly ticketMedio = computed(() => {
     const despesas = this.despesasDoMes();
     return despesas.length ? sumValores(despesas) / despesas.length : 0;

@@ -24,7 +24,7 @@ import { CategoriaBadge } from '../../../categorias/components/categoria-badge/c
 import { Categoria } from '../../../categorias/data-access/categoria.models';
 import { CategoriaStore } from '../../../categorias/data-access/categoria.store';
 import { LancamentoDialog } from '../../components/lancamento-dialog/lancamento-dialog';
-import { availableMonths, resumo, sumValores } from '../../lancamento-stats';
+import { availableMonths, resumo, resumoPagamento, sumValores } from '../../lancamento-stats';
 import { Lancamento, TIPO_INFO, TipoLancamento } from '../../lancamento.models';
 import { LancamentosFacade } from '../../lancamentos.facade';
 
@@ -165,9 +165,8 @@ export class LancamentoList implements OnInit {
   });
 
   protected readonly total = computed(() => sumValores(this.filtered()));
-  protected readonly totalCredito = computed(() =>
-    sumValores(this.filtered().filter((l) => l.tipo === 'despesa' && l.formaPagamento === 'CREDITO')),
-  );
+  /** Crédito x débito/Pix/dinheiro, dentro dos filtros aplicados. */
+  protected readonly pagamento = computed(() => resumoPagamento(this.filtered()));
   protected readonly resumo = computed(() => resumo(this.filtered()));
   protected readonly media = computed(() =>
     this.filtered().length ? this.total() / this.filtered().length : 0,
