@@ -167,6 +167,7 @@ const ICONS = {
     'M18 12h.01',
   ],
   pix: ['M12 2.5 21.5 12 12 21.5 2.5 12z', 'M8.5 12 12 8.5 15.5 12 12 15.5z'],
+  messageCircle: ['M7.9 20A9 9 0 1 0 4 16.1L2 22Z'],
 } satisfies Record<string, string[]>;
 
 export type IconName = keyof typeof ICONS;

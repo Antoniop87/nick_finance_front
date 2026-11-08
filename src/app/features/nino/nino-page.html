@@ -1,0 +1,101 @@
+<h1 class="sr-only">Nino</h1>
+
+@if (carregandoStatus()) {
+  <div class="skeleton skeleton--chat"></div>
+} @else if (status() && !status()!.ativo) {
+  <section class="card aviso">
+    <app-nino-avatar [size]="44" />
+    <div>
+      <strong>O Nino está dormindo na toca.</strong>
+      <p class="muted">Defina a variável <code>GROQ_API_KEY</code> na API e reinicie para acordá-lo.</p>
+    </div>
+  </section>
+} @else {
+  <section class="card chat" [class.chat--inicio]="!mensagens().length">
+    @if (!mensagens().length) {
+      <div class="inicio">
+        <app-nino-avatar [size]="148" [corpoInteiro]="true" />
+        <h2>{{ saudacao() }}</h2>
+        <p class="muted">Sou o Nino, o coelho que cuida das contas aqui na toca. Posso olhar seus gastos, orçamentos e metas para você.</p>
+
+        <div class="inicio__composer">
+          <ng-container [ngTemplateOutlet]="composer" />
+        </div>
+
+        <div class="sugestoes">
+          @for (sugestao of sugestoes; track sugestao.texto) {
+            <button type="button" class="sugestao" [disabled]="!status() || semCota()" (click)="perguntar(sugestao.texto)">
+              <span class="chip-icon chip-icon--sm"><app-icon [name]="sugestao.icone" /></span>
+              {{ sugestao.texto }}
+            </button>
+          }
+        </div>
+      </div>
+    } @else {
+      <header class="chat__topo">
+        <app-nino-avatar [size]="34" [pensando]="enviando()" />
+        <div>
+          <strong>Nino</strong>
+          <span class="muted">{{ enviando() ? 'Farejando seus lançamentos...' : 'Seu coelho das finanças' }}</span>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm" (click)="limpar()">
+          <app-icon name="refresh" [size]="14" /> Nova conversa
+        </button>
+      </header>
+
+      <div #lista class="chat__lista" role="log" aria-live="polite" aria-label="Conversa com o Nino">
+        @for (mensagem of mensagens(); track $index) {
+          <div class="mensagem" [class.mensagem--usuario]="mensagem.papel === 'user'">
+            @if (mensagem.papel === 'assistant') {
+              <app-nino-avatar [size]="30" />
+            }
+            <div class="balao">{{ mensagem.texto }}</div>
+          </div>
+        }
+
+        @if (enviando()) {
+          <div class="mensagem">
+            <app-nino-avatar [size]="30" [pensando]="true" />
+            <div class="balao balao--pensando" aria-label="O Nino está procurando a resposta">
+              <span></span><span></span><span></span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="chat__rodape">
+        <ng-container [ngTemplateOutlet]="composer" />
+      </div>
+    }
+  </section>
+}
+
+<ng-template #composer>
+  @if (erro(); as message) {
+    <div class="alert alert-error" role="alert"><app-icon name="alert" /> {{ message }}</div>
+  }
+
+  <form class="composer" (submit)="$event.preventDefault(); enviar()">
+    <label for="mensagem-nino" class="sr-only">Sua mensagem</label>
+    <textarea
+      id="mensagem-nino"
+      rows="1"
+      placeholder="Pergunte ao Nino"
+      [maxLength]="tamanhoMaximo"
+      [value]="texto()"
+      [disabled]="semCota()"
+      (input)="digitar($event)"
+      (keydown)="aoTeclar($event)"
+    ></textarea>
+    <button type="submit" class="btn btn-primary" [disabled]="!podeEnviar()" aria-label="Enviar mensagem">
+      <app-icon name="send" />
+    </button>
+  </form>
+
+  <p class="nota">
+    <span>O Nino pode errar. Confira valores importantes no extrato.</span>
+    @if (status(); as s) {
+      <span class="tabular">{{ s.restantesHoje }} de {{ s.limiteDiario }} mensagens restantes hoje</span>
+    }
+  </p>
+</ng-template>

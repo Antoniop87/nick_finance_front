@@ -31,6 +31,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/dashboard/dashboard').then((m) => m.Dashboard),
       },
       {
+        path: 'nino',
+        title: 'Nino · Nick Finance',
+        loadComponent: () => import('./features/nino/nino-page').then((m) => m.NinoPage),
+      },
+      {
         path: 'extrato',
         title: 'Extrato · Nick Finance',
         data: { tipo: 'todos' },

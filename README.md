@@ -77,6 +77,14 @@ Decisões principais:
 - **Regras de cálculo** (totais, comparativos, rankings) ficam em funções puras em
   `despesa-stats.ts`, cobertas por testes.
 
+## Assistente Nino
+
+Tela **Nino**: chat que responde sobre os dados da conta, só com leitura. O modelo roda no Groq e é chamado
+pela API; a chave nunca chega ao navegador, e a conversa não é gravada.
+
+Crie a chave em <https://console.groq.com/keys>. Localmente, coloque `groq.api-key` no `local.properties` da API;
+na hospedagem, use a variável `GROQ_API_KEY`. Opcionais: `GROQ_MODEL` e `NINO_LIMITE_DIARIO` (padrão 30).
+
 ## Bot do Telegram
 
 O usuário registra lançamentos mandando mensagens como `gastei 45,90 no mercado` ou

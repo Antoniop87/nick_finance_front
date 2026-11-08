@@ -31,7 +31,10 @@ export class Shell {
   protected readonly navSections: NavSection[] = [
     {
       title: 'Geral',
-      items: [{ label: 'Visão geral', path: '/dashboard', icon: 'dashboard' }],
+      items: [
+        { label: 'Visão geral', path: '/dashboard', icon: 'dashboard' },
+        { label: 'Nino', path: '/nino', icon: 'messageCircle' },
+      ],
     },
     {
       title: 'Movimentações',
