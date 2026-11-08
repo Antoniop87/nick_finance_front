@@ -8,6 +8,8 @@
   --primary-soft: #e8f8f1;
   --primary-ring: rgb(5 150 105 / 0.18);
   --on-primary: #ffffff;
+  // Traço do mascote do chat.
+  --mascote: var(--primary);
   --primary-gradient: linear-gradient(135deg, #0d9488 0%, #059669 50%, #10b981 100%);
   --hero-gradient:
     radial-gradient(120% 140% at 100% 0%, rgb(52 211 153 / 0.45) 0%, transparent 55%),
@@ -59,6 +61,7 @@
   --primary-soft: rgb(52 211 153 / 0.12);
   --primary-ring: rgb(52 211 153 / 0.25);
   --on-primary: #032619;
+  --mascote: #ffffff;
   --hero-gradient:
     radial-gradient(120% 140% at 100% 0%, rgb(52 211 153 / 0.35) 0%, transparent 55%),
     linear-gradient(135deg, #021a14 0%, #053b2c 50%, #065f46 100%);

@@ -1,4 +1,4 @@
-<h1 class="sr-only">Nino</h1>
+<h1 class="sr-only">Nick</h1>
 
 @if (carregandoStatus()) {
   <div class="skeleton skeleton--chat"></div>
@@ -6,7 +6,7 @@
   <section class="card aviso">
     <app-nino-avatar [size]="44" />
     <div>
-      <strong>O Nino está dormindo na toca.</strong>
+      <strong>O Nick está dormindo na casinha.</strong>
       <p class="muted">Defina a variável <code>GROQ_API_KEY</code> na API e reinicie para acordá-lo.</p>
     </div>
   </section>
@@ -14,9 +14,9 @@
   <section class="card chat" [class.chat--inicio]="!mensagens().length">
     @if (!mensagens().length) {
       <div class="inicio">
-        <app-nino-avatar [size]="148" [corpoInteiro]="true" />
+        <app-nino-avatar [size]="160" [corpoInteiro]="true" />
         <h2>{{ saudacao() }}</h2>
-        <p class="muted">Sou o Nino, o coelho que cuida das contas aqui na toca. Posso olhar seus gastos, orçamentos e metas para você.</p>
+        <p class="muted">Sou o Nick, o cachorro que fareja as suas contas. Posso olhar seus gastos, orçamentos e metas para você.</p>
 
         <div class="inicio__composer">
           <ng-container [ngTemplateOutlet]="composer" />
@@ -35,15 +35,15 @@
       <header class="chat__topo">
         <app-nino-avatar [size]="34" [pensando]="enviando()" />
         <div>
-          <strong>Nino</strong>
-          <span class="muted">{{ enviando() ? 'Farejando seus lançamentos...' : 'Seu coelho das finanças' }}</span>
+          <strong>Nick</strong>
+          <span class="muted">{{ enviando() ? 'Farejando seus lançamentos...' : 'Seu parceiro das finanças' }}</span>
         </div>
         <button type="button" class="btn btn-secondary btn-sm" (click)="limpar()">
           <app-icon name="refresh" [size]="14" /> Nova conversa
         </button>
       </header>
 
-      <div #lista class="chat__lista" role="log" aria-live="polite" aria-label="Conversa com o Nino">
+      <div #lista class="chat__lista" role="log" aria-live="polite" aria-label="Conversa com o Nick">
         @for (mensagem of mensagens(); track $index) {
           <div class="mensagem" [class.mensagem--usuario]="mensagem.papel === 'user'">
             @if (mensagem.papel === 'assistant') {
@@ -56,7 +56,7 @@
         @if (enviando()) {
           <div class="mensagem">
             <app-nino-avatar [size]="30" [pensando]="true" />
-            <div class="balao balao--pensando" aria-label="O Nino está procurando a resposta">
+            <div class="balao balao--pensando" aria-label="O Nick está procurando a resposta">
               <span></span><span></span><span></span>
             </div>
           </div>
@@ -80,7 +80,7 @@
     <textarea
       id="mensagem-nino"
       rows="1"
-      placeholder="Pergunte ao Nino"
+      placeholder="Pergunte ao Nick"
       [maxLength]="tamanhoMaximo"
       [value]="texto()"
       [disabled]="semCota()"
@@ -93,7 +93,7 @@
   </form>
 
   <p class="nota">
-    <span>O Nino pode errar. Confira valores importantes no extrato.</span>
+    <span>O Nick pode errar. Confira valores importantes no extrato.</span>
     @if (status(); as s) {
       <span class="tabular">{{ s.restantesHoje }} de {{ s.limiteDiario }} mensagens restantes hoje</span>
     }

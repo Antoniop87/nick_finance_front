@@ -21,7 +21,7 @@ import { NinoAvatar } from './nino-avatar';
 
 const TAMANHO_MAXIMO = 1000;
 
-/** Conversa com o Nino. O histórico vive só nesta tela e some ao sair dela. */
+/** Conversa com o Nick. O histórico vive só nesta tela e some ao sair dela. */
 @Component({
   selector: 'app-nino-page',
   imports: [NgTemplateOutlet, Icon, NinoAvatar],
@@ -67,7 +67,7 @@ export class NinoPage implements OnInit {
       .subscribe({
         next: (status) => this.status.set(status),
         error: (err: unknown) =>
-          this.erro.set(httpErrorMessage(err, {}, 'Não foi possível falar com o Nino.')),
+          this.erro.set(httpErrorMessage(err, {}, 'Não foi possível falar com o Nick.')),
       });
   }
 
@@ -118,8 +118,8 @@ export class NinoPage implements OnInit {
             httpErrorMessage(
               err,
               {
-                429: 'O Nino cansou de pular por hoje. Amanhã ele volta com mais fôlego.',
-                503: 'O Nino saiu da toca por um instante. Tente de novo em alguns segundos.',
+                429: 'O Nick já correu demais por hoje. Amanhã ele volta com mais fôlego.',
+                503: 'O Nick saiu para passear por um instante. Tente de novo em alguns segundos.',
               },
               'Não foi possível enviar a mensagem.',
             ),

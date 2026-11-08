@@ -33,7 +33,7 @@ export class Shell {
       title: 'Geral',
       items: [
         { label: 'Visão geral', path: '/dashboard', icon: 'dashboard' },
-        { label: 'Nino', path: '/nino', icon: 'messageCircle' },
+        { label: 'Nick', path: '/nick', icon: 'messageCircle' },
       ],
     },
     {

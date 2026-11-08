@@ -30,7 +30,7 @@ export function historicoParaEnvio(mensagens: readonly MensagemNino[]): Mensagem
   return mensagens.slice(-MAX_HISTORICO);
 }
 
-/** Assistente Nino da conta logada. */
+/** Assistente Nick da conta logada. */
 @Injectable({ providedIn: 'root' })
 export class NinoApi {
   private readonly http = inject(HttpClient);

@@ -31,8 +31,8 @@ export const routes: Routes = [
         loadComponent: () => import('./features/dashboard/dashboard').then((m) => m.Dashboard),
       },
       {
-        path: 'nino',
-        title: 'Nino · Nick Finance',
+        path: 'nick',
+        title: 'Nick · Nick Finance',
         loadComponent: () => import('./features/nino/nino-page').then((m) => m.NinoPage),
       },
       {

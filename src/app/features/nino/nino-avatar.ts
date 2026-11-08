@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
 /** Largura ÷ altura do desenho de corpo inteiro. */
-const PROPORCAO_CORPO = 310 / 480;
+const PROPORCAO_CORPO = 409 / 520;
 
 /**
- * O Nino, mascote do chat. Corpo inteiro na tela inicial e só a cabeça, num círculo,
- * nos tamanhos pequenos. O PNG é usado como máscara, então o traço segue a cor do tema.
- * Dá pulinhos enquanto procura a resposta.
+ * O Nick, mascote do chat. Corpo inteiro na tela inicial e só o rosto, num círculo,
+ * nos tamanhos pequenos. O PNG é usado como máscara, pintada com --mascote:
+ * branco no tema escuro e verde no claro. Dá pulinhos enquanto procura a resposta.
  */
 @Component({
   selector: 'app-nino-avatar',
@@ -37,7 +37,7 @@ const PROPORCAO_CORPO = 310 / 480;
       display: block;
       width: 100%;
       height: 100%;
-      background: var(--primary);
+      background: var(--mascote);
       mask-position: center;
       mask-repeat: no-repeat;
       mask-size: contain;
@@ -47,21 +47,21 @@ const PROPORCAO_CORPO = 310 / 480;
     }
 
     :host(.circulo) .desenho {
-      width: 86%;
-      height: 86%;
+      width: 90%;
+      height: 90%;
     }
 
     :host(.pensando) .desenho {
-      animation: pulinho-nino 0.9s ease-in-out infinite;
+      animation: pulinho-nick 0.9s ease-in-out infinite;
     }
 
-    @keyframes pulinho-nino {
+    @keyframes pulinho-nick {
       0%,
       100% {
         transform: translateY(0);
       }
       50% {
-        transform: translateY(-3px);
+        transform: translateY(-2px);
       }
     }
   `,
@@ -75,5 +75,5 @@ export class NinoAvatar {
   protected readonly largura = computed(() =>
     this.corpoInteiro() ? Math.round(this.size() * PROPORCAO_CORPO) : this.size(),
   );
-  protected readonly mascara = computed(() => `url(${this.corpoInteiro() ? 'nino.png' : 'nino-rosto.png'})`);
+  protected readonly mascara = computed(() => `url(${this.corpoInteiro() ? 'nick.png' : 'nick-rosto.png'})`);
 }
