@@ -82,6 +82,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/planejamento/metas/metas-page').then((m) => m.MetasPage),
       },
       {
+        path: 'bancos',
+        title: 'Bancos · Nick Finance',
+        loadComponent: () => import('./features/bancos/bancos-page').then((m) => m.BancosPage),
+      },
+      {
         path: 'telegram',
         title: 'Telegram · Nick Finance',
         loadComponent: () => import('./features/telegram/telegram-page').then((m) => m.TelegramPage),

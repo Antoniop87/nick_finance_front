@@ -1,0 +1,175 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+code {
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--surface-hover);
+  font-size: 0.85em;
+}
+
+.small {
+  font-size: 0.8rem;
+}
+
+.alert-warning {
+  background: var(--warning-soft);
+  color: var(--text);
+
+  app-icon {
+    color: var(--warning);
+  }
+
+  strong {
+    display: block;
+  }
+}
+
+.pill--warning {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.card-header {
+  gap: 12px;
+
+  h2 {
+    margin: 0;
+    font-size: 1.05rem;
+  }
+
+  p {
+    margin: 2px 0 0;
+  }
+}
+
+.skeleton--block {
+  height: 220px;
+}
+
+.vazio {
+  display: flex;
+  gap: 14px;
+  padding: 22px;
+
+  p {
+    margin: 4px 0 0;
+    max-width: 60ch;
+  }
+
+  &--centro {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}
+
+.aviso {
+  margin: 0 18px 8px;
+}
+
+.conexoes,
+.transacoes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  > li + li {
+    border-top: 1px solid var(--border);
+  }
+}
+
+.conexoes > li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+
+  @media (max-width: 640px) {
+    flex-wrap: wrap;
+  }
+}
+
+.conexoes__info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+
+  .erro {
+    color: var(--danger);
+  }
+}
+
+.transacoes > li {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 18px;
+  transition: opacity 0.15s;
+
+  &.ocupada {
+    opacity: 0.5;
+  }
+
+  @media (max-width: 860px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.transacoes__principal {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.transacoes__data {
+  flex-shrink: 0;
+  width: 44px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.transacoes__texto {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+
+  strong {
+    max-width: 100%;
+  }
+}
+
+.transacoes__acoes {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+
+  select {
+    width: 170px;
+  }
+
+  @media (max-width: 860px) {
+    select {
+      flex: 1;
+      width: auto;
+    }
+  }
+}
+
+.input--sm {
+  height: 34px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  font-size: 0.85rem;
+}

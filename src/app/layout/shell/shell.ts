@@ -56,7 +56,10 @@ export class Shell {
     },
     {
       title: 'Integrações',
-      items: [{ label: 'Telegram', path: '/telegram', icon: 'send' }],
+      items: [
+        { label: 'Bancos', path: '/bancos', icon: 'wallet' },
+        { label: 'Telegram', path: '/telegram', icon: 'send' },
+      ],
     },
   ];
 

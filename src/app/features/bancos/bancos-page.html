@@ -1,0 +1,193 @@
+<header class="page-header">
+  <div>
+    <span class="eyebrow">Integrações</span>
+    <h1>Bancos</h1>
+    <p>Conecte seu banco e revise as movimentações antes de elas entrarem no extrato.</p>
+  </div>
+  @if (status()?.ativo) {
+    <div class="page-actions">
+      <button type="button" class="btn btn-primary" [disabled]="conectando()" (click)="conectar()">
+        @if (conectando()) {
+          <span class="spinner"></span> Conectando...
+        } @else {
+          <app-icon name="plus" /> Conectar banco
+        }
+      </button>
+    </div>
+  }
+</header>
+
+@if (error(); as message) {
+  <div class="alert alert-error" role="alert"><app-icon name="alert" /> {{ message }}</div>
+}
+
+@if (loading() && !status()) {
+  <div class="skeleton skeleton--block"></div>
+} @else if (status(); as s) {
+  @if (!s.ativo) {
+    <div class="alert alert-warning" role="status">
+      <app-icon name="alert" />
+      <div>
+        <strong>A integração bancária não está ligada no servidor.</strong>
+        Defina <code>PLUGGY_CLIENT_ID</code> e <code>PLUGGY_CLIENT_SECRET</code> na API e reinicie.
+      </div>
+    </div>
+  }
+
+  <section class="card">
+    <header class="card-header">
+      <h2>Bancos conectados</h2>
+    </header>
+    @if (s.conexoes.length === 0) {
+      <div class="vazio">
+        <span class="chip-icon chip-icon--info"><app-icon name="link" /></span>
+        <div>
+          <strong>Nenhum banco conectado</strong>
+          <p class="muted">
+            Ao conectar, as movimentações dos últimos 90 dias chegam aqui para você revisar. A conexão é feita pela
+            Pluggy, com acesso somente leitura: o Nick Finance não vê sua senha e não movimenta dinheiro.
+          </p>
+        </div>
+      </div>
+    } @else {
+      <ul class="conexoes">
+        @for (c of s.conexoes; track c.id) {
+          <li>
+            <span class="chip-icon chip-icon--info"><app-icon name="wallet" /></span>
+            <div class="conexoes__info">
+              <strong>{{ c.nomeBanco ?? 'Banco' }}</strong>
+              <span class="muted small">
+                @if (c.ultimaSincronizacao) {
+                  Atualizado em {{ c.ultimaSincronizacao | date: "d 'de' MMM 'às' HH:mm" }}
+                } @else {
+                  Ainda não atualizado
+                }
+              </span>
+              @if (c.erro) {
+                <span class="erro small">{{ c.erro }}</span>
+              }
+            </div>
+            @let sit = situacao(c);
+            <span [class]="'pill pill--' + sit.tom">{{ sit.rotulo }}</span>
+            <div class="item-actions">
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm"
+                [disabled]="sincronizando() === c.id || !s.ativo"
+                (click)="sincronizar(c)"
+              >
+                @if (sincronizando() === c.id) {
+                  <span class="spinner"></span>
+                } @else {
+                  <app-icon name="refresh" />
+                }
+                Sincronizar
+              </button>
+              <button
+                type="button"
+                class="btn btn-icon"
+                aria-label="Desconectar banco"
+                title="Desconectar"
+                (click)="removendo.set(c)"
+              >
+                <app-icon name="trash" />
+              </button>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+
+  @if (s.conexoes.length > 0) {
+    <section class="card">
+      <header class="card-header">
+        <div>
+          <h2>Para revisar</h2>
+          <p class="muted small">Importe o que deve entrar no extrato e ignore o resto (ex.: pagamento da fatura).</p>
+        </div>
+        @if (transacoes().length > 1) {
+          <button type="button" class="btn btn-secondary btn-sm" [disabled]="importandoTodas()" (click)="importarTodas()">
+            @if (importandoTodas()) {
+              <span class="spinner"></span>
+            } @else {
+              <app-icon name="checkSquare" />
+            }
+            Importar todas
+          </button>
+        }
+      </header>
+
+      @if (temDuplicados()) {
+        <div class="alert alert-info aviso">
+          <app-icon name="alert" />
+          <span>
+            Itens marcados como <strong>possível duplicado</strong> têm um lançamento com o mesmo valor em data próxima.
+            Ignore-os se você já registrou à mão ou pelo Telegram.
+          </span>
+        </div>
+      }
+
+      @if (transacoes().length === 0) {
+        <div class="vazio vazio--centro">
+          <span class="chip-icon chip-icon--success"><app-icon name="check" /></span>
+          <p class="muted">Tudo revisado. Novas movimentações aparecem aqui automaticamente.</p>
+        </div>
+      } @else {
+        <ul class="transacoes">
+          @for (t of transacoes(); track t.id) {
+            <li [class.ocupada]="ocupada(t)">
+              <div class="transacoes__principal">
+                <span class="transacoes__data tabular">{{ t.data | date: 'dd/MM' }}</span>
+                <div class="transacoes__texto">
+                  <strong class="truncate">{{ t.descricao }}</strong>
+                  <span class="muted small">
+                    {{ t.conta }}
+                    @if (forma(t); as f) {
+                      · {{ f.curto }}
+                    }
+                  </span>
+                  @if (t.possivelDuplicado) {
+                    <span class="pill pill--warning">Possível duplicado</span>
+                  }
+                </div>
+                <strong
+                  class="tabular"
+                  [class.positive]="tipo(t) === 'receita'"
+                  [class.negative]="tipo(t) === 'despesa'"
+                >
+                  {{ tipo(t) === 'receita' ? '+' : '−' }} {{ t.valor | currency }}
+                </strong>
+              </div>
+              <div class="transacoes__acoes">
+                <select class="input input--sm" aria-label="Categoria" (change)="escolherCategoria(t, $event)">
+                  <option value="" [selected]="categoriaDe(t) === null">Sem categoria</option>
+                  @for (c of categoriasDe(t); track c.id) {
+                    <option [value]="c.id" [selected]="c.id === categoriaDe(t)">{{ c.nome }}</option>
+                  }
+                </select>
+                <button type="button" class="btn btn-primary btn-sm" [disabled]="ocupada(t)" (click)="importar(t)">
+                  Importar
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" [disabled]="ocupada(t)" (click)="ignorar(t)">
+                  Ignorar
+                </button>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  }
+}
+
+@if (removendo(); as c) {
+  <app-confirm-dialog
+    title="Desconectar banco"
+    [message]="'Desconectar ' + (c.nomeBanco ?? 'este banco') + '? Os lançamentos já importados continuam no extrato.'"
+    confirmLabel="Desconectar"
+    [busy]="removendoBusy()"
+    (confirmed)="confirmarRemocao()"
+    (cancelled)="removendo.set(null)"
+  />
+}

@@ -85,6 +85,17 @@ pela API; a chave nunca chega ao navegador, e a conversa não é gravada.
 Crie a chave em <https://console.groq.com/keys>. Localmente, coloque `groq.api-key` no `local.properties` da API;
 na hospedagem, use a variável `GROQ_API_KEY`. Opcionais: `GROQ_MODEL` e `NINO_LIMITE_DIARIO` (padrão 30).
 
+## Bancos (Pluggy)
+
+Tela **Integrações → Bancos**. O usuário conecta o banco pelo widget da Pluggy e as movimentações
+chegam numa lista **Para revisar**: nada entra no extrato sem ele clicar em *Importar* (ou *Importar todas*).
+Itens com o mesmo valor de um lançamento em data próxima aparecem como *possível duplicado*.
+
+- Na API: `pluggy.client-id` e `pluggy.client-secret` no `local.properties` (ou `PLUGGY_CLIENT_ID` e
+  `PLUGGY_CLIENT_SECRET` no Render). A API key da Pluggy é gerada a partir deles automaticamente.
+- Webhook (painel da Pluggy): `https://nick-finance-api.onrender.com/pluggy/webhook`.
+- O botão *Sincronizar* busca tudo na hora, útil rodando local (onde o webhook não chega).
+
 ## Bot do Telegram
 
 O usuário registra lançamentos mandando mensagens como `gastei 45,90 no mercado` ou
