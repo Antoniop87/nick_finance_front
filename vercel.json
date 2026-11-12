@@ -4,6 +4,6 @@
   "outputDirectory": "dist/nick-finance/browser",
   "rewrites": [
     { "source": "/api/:path*", "destination": "https://nick-finance-api.onrender.com/:path*" },
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    { "source": "/((?!api/)[^.]*)", "destination": "/index.html" }
   ]
 }
