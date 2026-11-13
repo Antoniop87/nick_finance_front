@@ -1,5 +1,8 @@
-/** Widget oficial da Pluggy, carregado só quando o usuário vai conectar um banco. */
-const SCRIPT_URL = 'https://cdn.pluggy.ai/connect/v2/pluggy-connect.js';
+/**
+ * Widget oficial da Pluggy, carregado só quando o usuário vai conectar um banco.
+ * A documentação recomenda a versão `latest` (o antigo `/connect/v2/` saiu do ar).
+ */
+const SCRIPT_URL = 'https://cdn.pluggy.ai/pluggy-connect/latest/pluggy-connect.js';
 
 export interface PluggyConnectOpcoes {
   connectToken: string;
